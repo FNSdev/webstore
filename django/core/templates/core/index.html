@@ -4,8 +4,14 @@
     Home Page
 {% endblock %}
 
+{% block sidebar %}
+    <div mt-5>
+        {% include 'core/includes/categories.html' %}
+    </div>
+{% endblock %}
+
 {% block main %}
     <h1>
-        Welcome!
+        Main Block
     </h1>
 {% endblock %}

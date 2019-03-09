@@ -17,7 +17,6 @@ class CustomUser(AbstractUser):
         is_new = False if self.id else True
         super(CustomUser, self).save(*args, **kwargs)
         if is_new:
-            print('ALLERT!')
             Basket = apps.get_model('core', 'Basket')
             basket = Basket()
             basket.save()
