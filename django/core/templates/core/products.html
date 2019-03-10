@@ -1,7 +1,17 @@
 {% extends "base.html" %}
 
+{% load crispy_forms_tags %}
+{% load my_tags %}
+
 {% block title %}
     Products
+{% endblock %}
+
+{% block sidebar %}
+    <form method="get">
+        {{ filter_form|crispy }}
+        <button type="submit" class="btn-lg btn-success mt-3">Filter</button>
+    </form>
 {% endblock %}
 
 {% block main %}
@@ -12,13 +22,13 @@
                 Paginate By
             </button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownPaginate">
-                <a class="dropdown-item" href="?paginate_by=1">1</a>
+                <a class="dropdown-item" href="?{%param_replace paginate_by=1%}">1</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?paginate_by=2">2</a>
+                <a class="dropdown-item" href="?{% param_replace paginate_by=2 %}">2</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?paginate_by=5">5</a>
+                <a class="dropdown-item" href="?{% param_replace paginate_by=5 %}">5</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?paginate_by=10">10</a>
+                <a class="dropdown-item" href="?{% param_replace paginate_by=10% }">10</a>
             </div>
         </div>
         <div class="btn-group">
@@ -27,11 +37,11 @@
                 Order By
             </button>
             <div class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownOrder">
-                <a class="dropdown-item" href="?paginate_by=1">By Popularity</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='view_count' %}">By Popularity</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?paginate_by=2">By Price</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='price' %}">By Price</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?paginate_by=5">By Release Year</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='name' %}">By Name</a>
             </div>
         </div>
     </div>
@@ -53,31 +63,31 @@
     <nav>
         <ul class="pagination justify-content-center">
             <li class="page-item">
-                <a href="?paginate_by={{paginate_by}}&page=1" class="page-link">
+                <a href="?{% param_replace page=1 %}" class="page-link">
                     First
                 </a>
             </li>
             {% if page_obj.has_previous %}
             <li class="page-item">
-                <a href="?paginate_by={{paginate_by}}&page={{page_obj.previous_page_number }}" class="page-link">
+                <a href="?{% param_replace page=page_obj.previous_page_number %}" class="page-link">
                     {{ page_obj.previous_page_number }}
                 </a>
             </li>
             {% endif %}
             <li class="page-item active">
-                <a href="?paginate_by={{paginate_by}}&page={{ page_obj.number }}" class="page-link">
+                <a href="?{% param_replace page=page_obj.number %}" class="page-link">
                     {{ page_obj.number }}
                 </a>
             </li>
             {% if page_obj.has_next %}
             <li class="page-item">
-                <a href="?paginate_by={{paginate_by}}&page={{ page_obj.next_page_number }}" class="page-link">
+                <a href="?{% param_replace page=page_obj.next_page_number %}" class="page-link">
                     {{ page_obj.next_page_number }}
                 </a>
             </li>
             {% endif %}
             <li class="page-item">
-                <a href="?paginate_by={{paginate_by}}&page=last" class="page-link">
+                <a href="?{% param_replace page=paginator.num_pages %}" class="page-link">
                     Last
                 </a>
             </li>

@@ -133,3 +133,5 @@ LOGOUT_REDIRECT_URL = 'core:index'
 
 MEDIA_URL = '/uploaded/'
 MEDIA_ROOT = os.path.join(BASE_DIR, '../media_root')
+
+#SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
