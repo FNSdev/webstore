@@ -9,6 +9,7 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
+    readonly_fields = ['basket']
     fieldsets = (
         (None, {
             'fields': ('username', 'password', 'first_name', 'last_name', 'city', 'address', 'phone_number', 'basket'),

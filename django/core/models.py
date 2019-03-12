@@ -49,6 +49,9 @@ class ProductImage(models.Model):
 
 class Basket(models.Model):
     products = models.ManyToManyField(to=Product)
+
+    def __str__(self):
+        return f'basket of {self.customuser.email}'
     
 
 class Order(models.Model):
@@ -80,6 +83,9 @@ class Announcement(models.Model):
     slug = models.SlugField(blank = True)
     date = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(blank=True, upload_to=announcement_image_upload_path)
+
+    class Meta:
+        ordering = ('-date', )
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.header)

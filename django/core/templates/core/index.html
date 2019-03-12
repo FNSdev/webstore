@@ -25,7 +25,7 @@
         <img src="{{ announcement.image.url }}" class="card-img-top mt-3" alt="Error" height="200px">
     {% endif %}
     <div class="card-body">
-        <h5 class="card-title">{{ announcement.body }}</h5>
+        <h5 class="card-title">{{ announcement.body|truncatewords:15 }}</h5>
         <a href="#" class="btn btn-primary">Read</a>
     </div>
     <div class="card-footer">
