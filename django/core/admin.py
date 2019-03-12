@@ -13,4 +13,6 @@ class CategoryAdmin(admin.ModelAdmin):
 admin.site.register(Basket)
 admin.site.register(Order)
 admin.site.register(Product)
+admin.site.register(ProductImage)
+admin.site.register(Announcement)
 admin.site.register(Category, CategoryAdmin)

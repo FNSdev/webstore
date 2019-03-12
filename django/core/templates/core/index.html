@@ -1,17 +1,76 @@
 {% extends "base.html" %}
 
+{% load my_tags %}
+
 {% block title %}
     Home Page
 {% endblock %}
 
-{% block sidebar %}
-    <div mt-5>
+{% block sidebar_left %}
+    <div>
         {% include 'core/includes/categories.html' %}
     </div>
 {% endblock %}
 
 {% block main %}
-    <h1>
-        Main Block
-    </h1>
+
+{% for announcement in object_list %}
+<div class="card mb-5" style="width: 26rem;">
+    <div class="card-header">
+        <h4>
+            {{ announcement.header }}
+        </h4>
+    </div>
+    {% if announcement.image %}
+        <img src="{{ announcement.image.url }}" class="card-img-top mt-3" alt="Error" height="200px">
+    {% endif %}
+    <div class="card-body">
+        <h5 class="card-title">{{ announcement.body }}</h5>
+        <a href="#" class="btn btn-primary">Read</a>
+    </div>
+    <div class="card-footer">
+        <h4>
+            {{ announcement.date }}
+        </h4>
+    </div>
+  </div>
+{% endfor %}
+</ul>
+
+
+{% if is_paginated %}
+<nav>
+    <ul class="pagination justify-content-center">
+        <li class="page-item">
+            <a href="?{% param_replace page=1 %}" class="page-link">
+                First
+            </a>
+        </li>
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a href="?{% param_replace page=page_obj.previous_page_number %}" class="page-link">
+                {{ page_obj.previous_page_number }}
+            </a>
+        </li>
+        {% endif %}
+        <li class="page-item active">
+            <a href="?{% param_replace page=page_obj.number %}" class="page-link">
+                {{ page_obj.number }}
+            </a>
+        </li>
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a href="?{% param_replace page=page_obj.next_page_number %}" class="page-link">
+                {{ page_obj.next_page_number }}
+            </a>
+        </li>
+        {% endif %}
+        <li class="page-item">
+            <a href="?{% param_replace page=paginator.num_pages %}" class="page-link">
+                Last
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
 {% endblock %}

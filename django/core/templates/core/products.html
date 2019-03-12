@@ -7,11 +7,20 @@
     Products
 {% endblock %}
 
-{% block sidebar %}
-    <form method="get">
-        {{ filter_form|crispy }}
-        <button type="submit" class="btn-lg btn-success mt-3">Filter</button>
-    </form>
+{% block sidebar_left %}
+    <div class="card" style="width: 24rem;">
+        <div class="card-header">
+            <h4>
+                Filters
+            </h4>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                {{ filter_form|crispy }}
+                <button type="submit" class="btn-lg btn-success mt-3">Filter</button>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
 {% block main %}
@@ -28,7 +37,7 @@
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="?{% param_replace paginate_by=5 %}">5</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?{% param_replace paginate_by=10% }">10</a>
+                <a class="dropdown-item" href="?{% param_replace paginate_by=10 %}">10</a>
             </div>
         </div>
         <div class="btn-group">
@@ -48,14 +57,16 @@
 
     <ul>
     {% for product in object_list %}
-        <div class="card mb-5 mt-5" style="width: 24rem;">
-            <div class="card-body">
-                <h5 class="card-title">
-                    {{ product.name }}
-                </h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ product.manufacturer }}</h6>
-            </div>
+    <div class="card mt-5" style="width: 20rem;">
+        {% if product.images.all %}
+            <img src="{{ product.images.first.image.url }}" class="card-img-top mt-3" alt="Error" height="350px">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text">{{ product.price }} byn</p>
+            <a href="#" class="btn btn-primary">Add to basket</a>
         </div>
+      </div>
     {% endfor %}
     </ul>
 

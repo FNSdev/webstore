@@ -3,12 +3,14 @@ from django.views import View
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 
-from .models import Category, Product
+from .models import Category, Product, Announcement
 from .forms import SmartphoneFilterForm
 
 
-class IndexView(TemplateView):
+class IndexView(ListView):
     template_name = "core/index.html"
+    model = Announcement
+    paginate_by = 3
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
