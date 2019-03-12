@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ object.header }}
+{% endblock %}
+
+{% block sidebar_left %}
+{% endblock %}
+
+{% block main %}
+
+<div class="card mb-5" style="width: 32rem;">
+    <div class="card-header">
+        <h4>
+            {{ object.header }}
+        </h4>
+    </div>
+    {% if object.image %}
+        <img src="{{ announcement.image.url }}" class="card-img-top mt-3" alt="Error" height="300px">
+    {% endif %}
+    <div class="card-body">
+        <h5 class="card-title">{{ object.body}}</h5>
+    </div>
+    <div class="card-footer">
+        <h4>
+            {{ object.date }}
+        </h4>
+    </div>
+</div>
+
+{% endblock %}

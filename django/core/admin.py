@@ -5,14 +5,20 @@ from .models import *
 
 class CategoryAdmin(admin.ModelAdmin):
     model = Category
-    fields = ['name', 'slug']
     readonly_fields = ['slug']
-    list_display = ['name']
 
+class ProductAdmin(admin.ModelAdmin):
+    model = Product
+    readonly_fields = ['slug']
+
+class AnnouncementAdmin(admin.ModelAdmin):
+    model = Announcement
+    readonly_fields = ['slug']
+    
 
 admin.site.register(Basket)
 admin.site.register(Order)
-admin.site.register(Product)
+admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductImage)
-admin.site.register(Announcement)
+admin.site.register(Announcement, AnnouncementAdmin)
 admin.site.register(Category, CategoryAdmin)

@@ -1,4 +1,4 @@
-from django.views.generic import TemplateView, ListView
+from django.views.generic import DetailView, ListView
 from django.views import View
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
@@ -18,7 +18,7 @@ class IndexView(ListView):
         return ctx
 
 
-class ProductsView(ListView):
+class ProductsView(ListView):    
     paginate_by = 10
     model = Product
     template_name = 'core/products.html'
@@ -62,3 +62,18 @@ class ProductsView(ListView):
         if request.GET.get('paginate_by'):
             self.paginate_by = request.GET['paginate_by']
         return super().get(request, *args, **kwargs)
+
+
+class AnnouncementDetailView(DetailView):
+    model = Announcement
+
+
+class ProductDetailView(DetailView):
+    model = Product
+
+    def get(self, *args, **kwargs):
+        obj = self.get_object()
+        obj.view_count += 1
+        obj.save()
+        return super().get(*args, **kwargs)
+    

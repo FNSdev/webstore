@@ -3,13 +3,17 @@ from django.contrib.postgres.fields import HStoreField
 from django.utils.text import slugify
 
 from uuid import uuid4
+import time
 
 class Category(models.Model):
     name = models.CharField(max_length=40)
     slug = models.SlugField(max_length=40, blank=True)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        old = Category.objects.filter(slug__iexact=self.slug).first()
+        if old:
+            if old.name!=self.name:
+                self.slug = slugify(f'{self.name}-{int(time.time())}')
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -27,9 +31,17 @@ class Product(models.Model):
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE, related_name='products')
     specifications = HStoreField(blank=True, default=dict)
     view_count = models.IntegerField(default=0)
+    slug = models.SlugField(blank=True)
+
+    def save(self, *args, **kwargs):
+        old = Product.objects.filter(slug__iexact=self.slug).first()
+        if old:
+            if old.name!=self.name:
+                self.slug = slugify(f'{self.name}-{int(time.time())}')
+        super().save(*args, **kwargs)
 
     class Meta:
-        ordering = ('view_count', 'name')
+        ordering = ('-view_count', 'name')
 
     def __str__(self):
         return f'{self.name}'
@@ -88,8 +100,11 @@ class Announcement(models.Model):
         ordering = ('-date', )
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.header)
-        super().save(self, *args, **kwargs)
+        old = Announcement.objects.filter(slug__iexact=self.slug).first()
+        if old:
+            if old.header!=self.header:
+                self.slug = slugify(f'{self.header}-{int(time.time())}')
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.header

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ object.name }}
+{% endblock %}
+
+{% block sidebar_left %}
+{% endblock %}
+
+{% block main %}
+
+<div class="card mb-5" style="width: 32rem;">
+    <div class="card-header">
+        <h4>
+            {{ object.name }}
+        </h4>
+    </div>
+    {% if object.images.all %}
+        <img src="{{ object.images.first.image.url }}" class="card-img-top mt-3" alt="Error" height="700px">
+    {% endif %}
+    <div class="card-body">
+        <h5 class="card-title">{{ object.price }} byn</h5>
+    </div>
+</div>
+
+{% endblock %}
