@@ -17,6 +17,7 @@ class AnnouncementAdmin(admin.ModelAdmin):
     
 
 admin.site.register(Basket)
+admin.site.register(ProductInBasket)
 admin.site.register(Order)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductImage)

@@ -60,10 +60,19 @@ class ProductImage(models.Model):
        
 
 class Basket(models.Model):
-    products = models.ManyToManyField(to=Product)
+    products = models.ManyToManyField(to=Product, through='ProductInBasket')   
 
     def __str__(self):
         return f'basket of {self.customuser.email}'
+
+
+class ProductInBasket(models.Model):
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
+    basket = models.ForeignKey(to=Basket, on_delete=models.CASCADE)
+    count = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.product.name} in "{self.basket.customuser.email}" basket'
     
 
 class Order(models.Model):
@@ -108,3 +117,5 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.header
+
+
