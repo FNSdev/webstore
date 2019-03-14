@@ -67,7 +67,7 @@
                     {{ product.name }}
                 </a>
             </h5>
-            <p class="card-text">{{ product.price }} byn</p>
+            <p class="card-text">{{ product.price }} BYN</p>
             {% if user.is_authenticated %}
                 <form class="buy-form" id="{{product.id}}">
                     <input type="number" min="1" value="1" class="count">
@@ -123,10 +123,9 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
-        $(document).on('submit', '.buy-form', function(e) {
-            $.noConflict()            
-
+        jQuery(document).on('submit', '.buy-form', function(e) {
             e.preventDefault()
+            var jq = jQuery.noConflict() 
             var $this = $(this)
             var id = $this.attr('id')
             var count = $this.children('.count').val()
@@ -139,7 +138,9 @@
                     count: count,
                     csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
-                success: function() {
+                cache: false,
+                success: function(response) {
+                    document.getElementById('products_in_basket_count').innerHTML = response['count']
                     alert('Success!')
                 },
                 error: function() {

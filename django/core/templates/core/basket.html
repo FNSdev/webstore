@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Basket
+{% endblock %}
+
+{% block main %}
+    <h2>Your basket</h2>
+    {% for product_in_basket in products %}
+        <li>{{product_in_basket.product.name}} : {{product_in_basket.count}}</li>
+    {% endfor %}
+{% endblock %}

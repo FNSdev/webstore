@@ -3,12 +3,14 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
+from django.http import JsonResponse
 
 
 from .models import Category, Product, Announcement, ProductInBasket
 from user.models import CustomUser
 from .forms import SmartphoneFilterForm
+
+import decimal
 
 
 class IndexView(ListView):
@@ -83,13 +85,30 @@ class ProductDetailView(DetailView):
     
 
 class AddToBasketView(LoginRequiredMixin, View):
+    login_url = '/user/login'
+
     def post(self, request, *args, **kwargs):
         product_id = self.request.POST['id']
         count = self.request.POST['count']
-        user = self.request.user
+        user = self.request.user 
 
         product = Product.objects.filter(id__iexact=product_id).first()
 
+        basket = user.basket 
+        basket.total_count += int(count)
+        basket.total_price += decimal.Decimal(int(count) * float(product.price))  
+        basket.save()
+
         ProductInBasket.objects.create(product=product, basket=user.basket, count=count)
 
-        return HttpResponse('')
+        return JsonResponse({'count': basket.total_count})
+
+
+class BasketView(LoginRequiredMixin, View):
+    login_url = '/user/login'
+
+    def get(self, request, *args, **kwargs):
+        basket = request.user.basket
+        products = ProductInBasket.objects.filter(basket__id=basket.id)
+
+        return render(request, 'core/basket.html', {'products': products})

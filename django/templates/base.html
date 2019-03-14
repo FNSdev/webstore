@@ -27,7 +27,12 @@
                 {% else %}
                     <a class="nav-link" href="{% url 'user:login' %}?next={{request.get_full_path|urlencode}}">Login</a>  
                 {% endif %}
-                <a class="nav-link" href="#">Basket</a>
+                <a href="{% url 'core:basket' %}" class="btn btn-primary mr-2" type="button">
+                    Basket 
+                    {% if user.is_authenticated %}
+                        <span id="products_in_basket_count" class="badge badge-light">{{user.basket.total_count}}</span>
+                    {% endif %}
+                </a>
                 <form class="form-inline my-2 my-lg-0">
                     <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
                     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
