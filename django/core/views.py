@@ -11,6 +11,7 @@ from user.models import CustomUser
 from .forms import SmartphoneFilterForm
 
 import decimal
+import ast
 
 
 class IndexView(ListView):
@@ -88,20 +89,56 @@ class AddToBasketView(LoginRequiredMixin, View):
     login_url = '/user/login'
 
     def post(self, request, *args, **kwargs):
-        product_id = self.request.POST['id']
-        count = self.request.POST['count']
-        user = self.request.user 
+        product_id = request.POST['id']
+        count = request.POST['count']
+        user = request.user 
 
         product = Product.objects.filter(id__iexact=product_id).first()
 
         basket = user.basket 
-        basket.total_count += int(count)
-        basket.total_price += decimal.Decimal(int(count) * float(product.price))  
+        basket.total_count += 1
         basket.save()
 
         ProductInBasket.objects.create(product=product, basket=user.basket, count=count)
 
         return JsonResponse({'count': basket.total_count})
+
+
+class UpdateBasketView(LoginRequiredMixin, View):
+    login_url = '/user/login'
+
+    def post(self, request, *args, **kwargs):
+        basket = request.user.basket 
+        pairs = request.POST['pairs']
+
+        pairs = ast.literal_eval(pairs)
+        
+        for key, value in pairs.items():
+            product_in_basket = ProductInBasket.objects.get(id__iexact=key)
+            product_in_basket.count = int(value)
+            product_in_basket.save()
+
+        print('updating basket')
+
+        return JsonResponse({})
+
+    
+class RemoveFromBasketView(LoginRequiredMixin, View):
+    login_url = '/user/login'
+
+    def post(self, request, *args, **kwargs):
+        product_id = request.POST['id']
+        basket = request.user.basket 
+
+        product_in_basket = ProductInBasket.objects.get(id__iexact=product_id)
+
+        basket.total_count -= 1
+        basket.save()
+
+        product_in_basket.delete()
+        total = basket.get_total_price()
+
+        return JsonResponse({'total': total, 'count': basket.total_count})
 
 
 class BasketView(LoginRequiredMixin, View):
@@ -111,4 +148,16 @@ class BasketView(LoginRequiredMixin, View):
         basket = request.user.basket
         products = ProductInBasket.objects.filter(basket__id=basket.id)
 
-        return render(request, 'core/basket.html', {'products': products})
+        return render(request, 'core/basket.html', {'products': products, 'total': basket.get_total_price()})
+
+
+class ConfirmOrderView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        basket = request.user.basket
+        products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
+
+        for p in products_in_basket:
+            #print(f'{p.product.name} : {p.count}')
+            print(p)
+
+        return render(request, 'core/confirm-order.html', {'products_in_basket' : products_in_basket})

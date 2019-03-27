@@ -62,7 +62,13 @@ class ProductImage(models.Model):
 class Basket(models.Model):
     products = models.ManyToManyField(to=Product, through='ProductInBasket')   
     total_count = models.PositiveIntegerField(default=0)
-    total_price = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+
+    def get_total_price(self):
+        total = 0
+        products = ProductInBasket.objects.filter(basket=self)
+        for product in products.all():
+            total += product.product.price * product.count
+        return total
 
     def __str__(self):
         return f'basket of {self.customuser.email}'
@@ -72,6 +78,9 @@ class ProductInBasket(models.Model):
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
     basket = models.ForeignKey(to=Basket, on_delete=models.CASCADE)
     count = models.PositiveIntegerField(default=1)
+
+    def get_price(self):
+        return self.product.price * int(self.count)
 
     def __str__(self):
         return f'{self.product.name} in "{self.basket.customuser.email}" basket'

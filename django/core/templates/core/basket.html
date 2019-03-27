@@ -6,7 +6,163 @@
 
 {% block main %}
     <h2>Your basket</h2>
-    {% for product_in_basket in products %}
-        <li>{{product_in_basket.product.name}} : {{product_in_basket.count}}</li>
-    {% endfor %}
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Count</th>
+                <th scope="col">Price</th>
+                <th scope="col">#</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product_in_basket in products %}
+            <tr id="{{product_in_basket.id}}" class="r" price="{{product_in_basket.product.price}}">
+                <td>
+                    <a href="{% url 'core:product' slug=product_in_basket.product.slug %}">
+                        {{product_in_basket.product.name}}
+                    </a>
+                </td>
+                <td class="d">
+                    <form class="f">
+                        <input autocomplete="off" type="number" min="1" value="{{product_in_basket.count}}" class="count">
+                    </form>
+                </td>
+                <td class="price">
+                    {{ product_in_basket.get_price }}
+                </td>
+                <td>
+                    <button class="btn btn-danger delete">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h4 id="total-price" align='right'>
+        Total price: {{total}}
+    </h4>
+
+    <div align="right">
+        <button id="order-button" class="btn-lg btn-success">
+            Order
+        </button>
+    </div>
+   
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script>
+        jQuery(document).on('change', '.r', function(event) {
+            var jq = jQuery.noConflict()
+            var $this = $(this)
+            var id = $this.attr('id')
+            var count = $this.children('.d').children('.f').children('.count').val()
+            var price = $this.attr('price')
+
+            $this.children('.price').html(Number(count * price).toFixed(2))
+
+            var children = Array.from(document.getElementsByClassName('price'))
+
+            var total = 0
+            children.forEach(element => {
+                total += Number(element.innerText)
+            })
+
+            document.getElementById('total-price').innerHTML = 'Total price: ' + Number(total).toFixed(2)
+
+        })
+    </script>
+
+    <script>
+        jQuery(document).on('click', '.delete', function(event) {
+            var jq = jQuery.noConflict()
+            var $this = $(this)
+            var id = $this.parent().parent().attr('id')
+            
+            $.ajax ({
+                type: 'POST',
+                url: "{% url 'core:remove-from-basket' %}",
+                data: {
+                    id: id,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    $this.parent().parent().remove()   
+                    var total = response['total']
+                    document.getElementById('products_in_basket_count').innerHTML = response['count']
+                    document.getElementById('total-price').innerHTML = 'Total price: ' + Number(total).toFixed(2)
+                }
+            })
+        })
+    </script>
+
+    <script>
+        flag = false
+        jQuery(window).on('beforeunload', function() {
+            var jq = jQuery.noConflict()
+            var $this = $(this)
+            var data = {}
+
+            data['pairs'] = {}
+
+            var children_rows = Array.from(document.getElementsByClassName('r'))
+            var childern_forms_input = Array.from(document.getElementsByClassName('count'))
+
+            var counter = 0
+            children_rows.forEach(element => {
+                data['pairs'][element.id] = childern_forms_input[counter].value
+                counter += 1
+            })
+
+            data['pairs'] = JSON.stringify(data['pairs'])
+
+            data['csrfmiddlewaretoken'] = '{{ csrf_token }}'
+
+                        
+            if(!flag)
+            {
+                $.ajax({
+                type: 'POST',
+                url: "{% url 'core:update-basket' %}",
+                data: data,
+                async: false
+                })
+            }        
+        })
+
+        jQuery(document).on('click', '#order-button', function(event) {
+            var jq = jQuery.noConflict()
+            var $this = $(this)
+            var data = {}
+
+            data['pairs'] = {}
+
+            var children_rows = Array.from(document.getElementsByClassName('r'))
+            var childern_forms_input = Array.from(document.getElementsByClassName('count'))
+
+            var counter = 0
+            children_rows.forEach(element => {
+                data['pairs'][element.id] = childern_forms_input[counter].value
+                counter += 1
+            })
+
+            data['pairs'] = JSON.stringify(data['pairs'])
+
+            data['csrfmiddlewaretoken'] = '{{ csrf_token }}'
+
+            jQuery(window).off('onbeforeunload')
+            flag=true
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'core:update-basket' %}",
+                data: data,
+                success: function () {
+                    window.location.href = "{% url 'core:confirm-order' %}"
+                }
+            })
+        })
+    </script>
+
 {% endblock %}
