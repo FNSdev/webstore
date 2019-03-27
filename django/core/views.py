@@ -6,9 +6,9 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
 
-from .models import Category, Product, Announcement, ProductInBasket
+from core.models import Category, Product, Announcement, ProductInBasket
 from user.models import CustomUser
-from .forms import SmartphoneFilterForm
+from core.forms import GENERATED_FORMS
 
 import decimal
 import ast
@@ -35,9 +35,10 @@ class ProductsView(ListView):
         ctx['paginate_by'] = self.paginate_by
 
         args = self.request.GET.dict()
-        form = SmartphoneFilterForm(initial=args)
+        category_slug = self.kwargs['category']
+        print(category_slug)
 
-        ctx['filter_form'] = form
+        ctx['filter_form'] = GENERATED_FORMS[category_slug](initial=args)
         return ctx
 
     def get_queryset(self):

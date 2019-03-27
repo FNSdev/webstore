@@ -1,6 +1,10 @@
 from django.urls import path
 
-from .views import *
+from core.views import *
+from core.models import Category
+from core.utils import FormGenerator
+from core.forms import GENERATED_FORMS
+
 
 app_name = 'core'
 urlpatterns = [
@@ -14,3 +18,10 @@ urlpatterns = [
     path('product/<str:slug>/', ProductDetailView.as_view(), name='product'),
     path('announcement/<str:slug>/', AnnouncementDetailView.as_view(), name='announcement'),
 ]
+
+
+categories = Category.objects.all()
+
+for cat in categories:
+    form = FormGenerator.generate(cat.slug, cat.specifications)
+    GENERATED_FORMS[cat.slug] = form

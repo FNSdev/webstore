@@ -1,6 +1,9 @@
 from django.db import models
-from django.contrib.postgres.fields import HStoreField
+from django.contrib.postgres.fields import HStoreField, ArrayField
 from django.utils.text import slugify
+
+from core.utils import FormGenerator
+from core.forms import GENERATED_FORMS
 
 from uuid import uuid4
 import time
@@ -8,12 +11,21 @@ import time
 class Category(models.Model):
     name = models.CharField(max_length=40)
     slug = models.SlugField(max_length=40, blank=True)
+    specifications = HStoreField(default=dict)
 
     def save(self, *args, **kwargs):
         old = Category.objects.filter(slug__iexact=self.slug).first()
+        print(old)
         if old:
-            if old.name!=self.name:
+            if old.name != self.name:
                 self.slug = slugify(f'{self.name}-{int(time.time())}')
+            if old.specifications != self.specifications:
+                form = FormGenerator.generate(self.slug, self.specifications)
+                GENERATED_FORMS[self.slug] = form
+        else:  
+            self.slug = slugify(f'{self.name}-{int(time.time())}')          
+            form = FormGenerator.generate(self.slug, self.specifications)
+            GENERATED_FORMS[self.slug] = form
         super().save(*args, **kwargs)
 
     def __str__(self):
