@@ -1,12 +1,12 @@
 from django.views.generic import DetailView, ListView
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
 
-from core.models import Category, Product, Announcement, ProductInBasket
+from core.models import Category, Product, Announcement, ProductInBasket, Order
 from user.models import CustomUser
 from core.forms import GENERATED_FORMS
 
@@ -153,12 +153,30 @@ class BasketView(LoginRequiredMixin, View):
 
 
 class ConfirmOrderView(LoginRequiredMixin, View):
+    login_url = '/user/login'
+
     def get(self, request, *args, **kwargs):
         basket = request.user.basket
         products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
 
-        for p in products_in_basket:
-            #print(f'{p.product.name} : {p.count}')
-            print(p)
+        return render(
+            request, 'core/confirm-order.html',
+            {'products_in_basket' : products_in_basket, 'total': basket.get_total_price()}
+        )
 
-        return render(request, 'core/confirm-order.html', {'products_in_basket' : products_in_basket})
+
+class MakeOrderView(LoginRequiredMixin, View):
+    login_url = '/user/login'
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        basket = user.basket
+
+        products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
+
+        order = Order(user=user)
+
+        for product_in_basket in products_in_basket.all():
+            print(f'{product_in_basket.product} : {product_in_basket.count}')
+
+        return redirect('core:index')

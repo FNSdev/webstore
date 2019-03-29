@@ -31,13 +31,13 @@
                 Paginate By
             </button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownPaginate">
-                <a class="dropdown-item" href="?{%param_replace paginate_by=1%}">1</a>
+                <a class="dropdown-item" href="?{%param_replace paginate_by=1 remove_page=1 %}">1</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?{% param_replace paginate_by=2 %}">2</a>
+                <a class="dropdown-item" href="?{% param_replace paginate_by=2 remove_page=1 %}">2</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?{% param_replace paginate_by=5 %}">5</a>
+                <a class="dropdown-item" href="?{% param_replace paginate_by=5 remove_page=1 %}">5</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?{% param_replace paginate_by=10 %}">10</a>
+                <a class="dropdown-item" href="?{% param_replace paginate_by=10 remove_page=1 %}">10</a>
             </div>
         </div>
         <div class="btn-group">
@@ -46,11 +46,11 @@
                 Order By
             </button>
             <div class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownOrder">
-                <a class="dropdown-item" href="?{% param_replace order_by='view_count' %}">By Popularity</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='view_count' remove_page=1 %}">By Popularity</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?{% param_replace order_by='price' %}">By Price</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='price' remove_page=1 %}">By Price</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?{% param_replace order_by='name' %}">By Name</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='name' remove_page=1 %}">By Name</a>
             </div>
         </div>
     </div>

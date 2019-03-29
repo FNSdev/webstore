@@ -50,6 +50,8 @@ class Product(models.Model):
         if old:
             if old.name!=self.name:
                 self.slug = slugify(f'{self.name}-{int(time.time())}')
+        else:
+            self.slug = slugify(f'{self.name}-{int(time.time())}')
         super().save(*args, **kwargs)
 
     class Meta:
@@ -136,6 +138,8 @@ class Announcement(models.Model):
         if old:
             if old.header!=self.header:
                 self.slug = slugify(f'{self.header}-{int(time.time())}')
+        else:
+            self.slug = slugify(f'{self.header}-{int(time.time())}')
         super().save(*args, **kwargs)
 
     def __str__(self):

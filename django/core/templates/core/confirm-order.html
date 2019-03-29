@@ -4,10 +4,86 @@
     Confirm Order
 {% endblock %}
 
+{% block sidebar_left %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Count</th>
+                <th scope="col">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product_in_basket in products_in_basket %}
+            <tr>
+                <td>
+                    <a href="{% url 'core:product' slug=product_in_basket.product.slug %}">
+                        {{ product_in_basket.product.name }}
+                    </a>
+                </td>
+                <td>
+                    {{ product_in_basket.count }}
+                </td>
+                <td>
+                    {{ product_in_basket.get_price }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
 {% block main %}
-    {% for product_in_basket in products_in_basket %}
-        <li>
-            {{product_in_basket.product.name}} : {{product_in_basket.count}}
-        </li>
-    {% endfor %}
+    <h4>
+        <div class="alert alert-warning" role="alert">
+            Please, make sure that information is correct
+        </div>
+    </h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Property</th>
+                <th scope="col">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>First Name</td>
+                <td>{{ request.user.first_name }}</td>
+            </tr>
+            <tr>
+                <td>Last Name</td>
+                <td>{{ request.user.last_name }}</td>
+            </tr>
+            <tr>
+                <td>Address</td>
+                <td>{{ request.user.address }}</td>
+            </tr>
+            <tr>
+                <td>E-mail</td>
+                <td>{{ request.user.email }}</td>
+            </tr>
+            <tr>
+                <td>Phone Number</td>
+                <td>{{ request.user.phone_number }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>
+        <div class="alert alert-info" role="alert">
+            Total Payment: {{ total }}
+        </div>
+    </h4>
+
+    <div align="right">
+        <form method="POST" action="{% url 'core:make-order' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-lg btn-success">
+                Confirm Order
+            </button>
+        </form>
+
+    </div>
+
 {% endblock %}

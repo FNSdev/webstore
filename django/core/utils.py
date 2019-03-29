@@ -1,6 +1,7 @@
 from django import forms
 
 
+# TODO move this into forms.py
 class FormGenerator():
     @staticmethod
     def generate(slug, specifications):
@@ -8,9 +9,9 @@ class FormGenerator():
         params = {}
     
         for key, value in specifications.items():
-            if(value) == 'str':
+            if value == 'str':
                 params[key] = forms.CharField(max_length=40, required=False)
-            elif(value) == 'int':
+            elif value == 'int':
                 params[key] = forms.IntegerField(required=False)
 
         name = slug + '_form'
