@@ -113,10 +113,20 @@ class Order(models.Model):
         (RECIEVED, 'REJECTED'),
     )
 
-    products = models.ManyToManyField(to=Product)
+    products = models.ManyToManyField(to=Product, through='ProductInOrder')
     date = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(choices=STATUSES, default=RECIEVED)
     user = models.ForeignKey(to='user.CustomUser', on_delete=models.CASCADE)
+    total_price = models.DecimalField(max_digits=7, decimal_places=2)
+
+    def __str__(self):
+        return f'order of {user.email}, {date}'
+
+
+class ProductInOrder(models.Model):
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
+    order = models.ForeignKey(to=Order, on_delete=models.CASCADE)
+    count = models.PositiveIntegerField(default=1)
 
 
 def announcement_image_upload_path(instance, filename):

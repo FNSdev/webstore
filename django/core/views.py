@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 
 
-from core.models import Category, Product, Announcement, ProductInBasket, Order
+from core.models import Category, Product, Announcement, ProductInBasket, Order, ProductInOrder
 from user.models import CustomUser
 from core.forms import GENERATED_FORMS
 
@@ -174,9 +174,17 @@ class MakeOrderView(LoginRequiredMixin, View):
 
         products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
 
-        order = Order(user=user)
+        order = Order.objects.create(user=user)
 
         for product_in_basket in products_in_basket.all():
-            print(f'{product_in_basket.product} : {product_in_basket.count}')
+            ProductInOrder.objects.create(
+                product=product_in_basket.product,
+                order=order,
+                count=product_in_basket.count
+            )
+            product_in_basket.delete()
+
+        basket.total_count = 0
+        basket.save()    
 
         return redirect('core:index')

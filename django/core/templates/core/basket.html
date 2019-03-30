@@ -45,11 +45,14 @@
         Total price: {{total}}
     </h4>
 
-    <div align="right">
-        <button id="order-button" class="btn-lg btn-success">
-            Order
-        </button>
-    </div>
+    {% if products %}
+        <div align="right">
+            <button id="order-button" class="btn-lg btn-success">
+                Order
+            </button>
+        </div>
+    {% endif %}
+
    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
