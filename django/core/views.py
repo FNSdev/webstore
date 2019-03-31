@@ -10,7 +10,6 @@ from core.models import Category, Product, Announcement, ProductInBasket, Order,
 from user.models import CustomUser
 from core.forms import GENERATED_FORMS
 
-import decimal
 import ast
 
 
@@ -119,8 +118,6 @@ class UpdateBasketView(LoginRequiredMixin, View):
             product_in_basket.count = int(value)
             product_in_basket.save()
 
-        print('updating basket')
-
         return JsonResponse({})
 
     
@@ -160,7 +157,7 @@ class ConfirmOrderView(LoginRequiredMixin, View):
         products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
 
         return render(
-            request, 'core/confirm-order.html',
+            request, 'core/confirm_order.html',
             {'products_in_basket' : products_in_basket, 'total': basket.get_total_price()}
         )
 
@@ -174,7 +171,7 @@ class MakeOrderView(LoginRequiredMixin, View):
 
         products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
 
-        order = Order.objects.create(user=user)
+        order = Order.objects.create(user=user, total_price=basket.get_total_price())
 
         for product_in_basket in products_in_basket.all():
             ProductInOrder.objects.create(

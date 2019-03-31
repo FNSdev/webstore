@@ -97,7 +97,7 @@ class ProductInBasket(models.Model):
         return self.product.price * int(self.count)
 
     def __str__(self):
-        return f'{self.product.name} in "{self.basket.customuser.email}" basket'
+        return f'{self.product.name} in the "{self.basket}'
     
 
 class Order(models.Model):
@@ -117,16 +117,19 @@ class Order(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(choices=STATUSES, default=RECIEVED)
     user = models.ForeignKey(to='user.CustomUser', on_delete=models.CASCADE)
-    total_price = models.DecimalField(max_digits=7, decimal_places=2)
+    total_price = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 
     def __str__(self):
-        return f'order of {user.email}, {date}'
+        return f'order of {self.user.email}, {self.date}'
 
 
 class ProductInOrder(models.Model):
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
     order = models.ForeignKey(to=Order, on_delete=models.CASCADE)
     count = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.product.name} in the {self.order}'
 
 
 def announcement_image_upload_path(instance, filename):
