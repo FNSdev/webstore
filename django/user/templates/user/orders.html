@@ -12,11 +12,56 @@
         My Orders
     </h4>
 
-    {% for order in object_list %}
-        <li>
-            {{ order }}
-        </li>
-    {% endfor %}
+    <style>
+        td {
+            text-align: center
+        }
+    
+        th {
+            text-align: center
+        }
+    </style>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Date</th>
+                <th scope="col">Price</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in object_list %}
+                <tr>
+                    <td>{{order.id}}</td>
+                    <td>
+                        <a href="{% url 'user:order-details' pk=order.id %}">
+                            {{order.date}}
+                        </a>
+                    </td>
+                    <td>{{order.total_price}}</td>
+                    {% if order.status == 0 %}
+                        <td>
+                            <span class="badge badge-warning">{{order.get_status_display}}</span>
+                        </td>
+                    {% elif order.status == 1 %}
+                        <td>
+                            <span class="badge badge-info">{{order.get_status_display}}</span>
+                        </td>
+                    {% elif order.status == 2 %}
+                        <td>
+                            <span class="badge badge-success">{{order.get_status_display}}</span>
+                        </td>
+                    {% elif order.status == 3 %}
+                        <td>
+                            <span class="badge badge-danger">{{order.get_status_display}}</span>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     {% if is_paginated %}
     <nav>

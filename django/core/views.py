@@ -1,14 +1,14 @@
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
 
-
-from core.models import Category, Product, Announcement, ProductInBasket, Order, ProductInOrder
+from core.models import Category, Product, Announcement, ProductInBasket, Order, ProductInOrder, Review
 from user.models import CustomUser
-from core.forms import GENERATED_FORMS
+from core.forms import GENERATED_FORMS, ReviewForm
 
 import ast
 
@@ -75,15 +75,88 @@ class AnnouncementDetailView(DetailView):
     model = Announcement
 
 
-class ProductDetailView(DetailView):
-    model = Product
+class ProductDetailView(ListView):
+    template_name = 'core/product_detail.html'
+    model = Review
+    paginate_by = 3
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        ctx = self.get_context_data(**kwargs)
+        return render(request, 'core/product_detail.html', ctx)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
         obj = self.get_object()
-        obj.view_count += 1
-        obj.save()
-        return super().get(*args, **kwargs)
+        ctx['object'] = obj
+
+        if self.request.user.is_authenticated:
+            review = Review.objects.get_review_or_unsaved_blank_review(
+                product=obj,
+                user=self.request.user
+            )
+            if review.id:
+                review_form_url = reverse('core:update-review', kwargs={'slug': obj.slug, 'pk': review.id})
+            else:
+                review_form_url = reverse('core:create-review', kwargs={'slug': obj.slug})
+            review_form = ReviewForm(instance=review)
+            ctx['review_form'] = review_form
+            ctx['review_form_url'] = review_form_url
+
+        return ctx    
     
+    def get_queryset(self):
+        product = self.get_object()
+        print(product)
+        return Review.objects.filter(product=product)
+    
+    def get_object(self):
+        slug = self.kwargs.get('slug')
+        product = get_object_or_404(Product, slug__iexact=slug)
+        product.view_count += 1
+        product.save()
+        return product
+        
+
+class CreateReviewView(LoginRequiredMixin, CreateView):
+    login_url = '/user/login'
+    form_class = ReviewForm
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['user'] = self.request.user.id
+        initial['product'] = Product.objects.get(slug=self.kwargs['slug']).id
+        return initial
+
+    def get_success_url(self):
+        product_slug = self.object.product.slug
+        return reverse('core:product', kwargs={'slug': product_slug})
+
+    def render_to_response(self, context, **response_kwargs):
+        return redirect(to=self.get_success_url())
+
+
+class UpdateReviewView(LoginRequiredMixin, UpdateView):
+    login_url = '/user/login'
+    form_class = ReviewForm
+    queryset = Review.objects.all()
+
+    def get_object(self, queryset=None):
+        review = super().get_object(queryset)
+        user = self.request.user
+        if review.user != user:
+            raise PermissionDeniend('Cannot change another user review')
+        return review
+
+    def get_success_url(self):
+        product_slug = self.object.product.slug
+        return reverse('core:product', kwargs={'slug': product_slug})
+
+    def render_to_response(self, context, **response_kwargs):
+        product_slug = context['object'].slug
+        product_detail_url = reverse('core:product', kwargs={'slug': product_slug})
+        return redirect(to=product_detail_url)
+
 
 class AddToBasketView(LoginRequiredMixin, View):
     login_url = '/user/login'

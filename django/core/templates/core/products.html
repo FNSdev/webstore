@@ -67,19 +67,24 @@
                     {{ product.name }}
                 </a>
             </h5>
-            <p class="card-text">{{ product.price }} BYN</p>
-            {% if user.is_authenticated %}
-                <form class="buy-form" id="{{product.id}}">
-                    <input type="number" min="1" value="1" class="count">
-                    <button type="submit" class="btn btn-success mt-2 buy">Add to basket</button>
-                </form>             
-            {% else %}
-                <div class="alert alert-warning" role="alert"> 
-                    Please,
-                    <a href="{% url 'user:login' %}?next={{request.get_full_path|urlencode}}">Login</a>
-                </div>
-            {% endif %}
+            <h4 class="card-text">{{ product.price }} BYN</h4>
+            <p align="justify">{{ product.general_info }}</p>
 
+            {% if product.is_available %}
+                {% if user.is_authenticated %}
+                    <form class="buy-form" id="{{product.id}}">
+                        <input type="number" min="1" max="10" value="1" class="count">
+                        <button type="submit" class="btn btn-success mt-2 buy">Add to basket</button>
+                    </form> 
+                {% else %}
+                    <div class="alert alert-warning" role="alert"> 
+                        Please,
+                        <a href="{% url 'user:login' %}?next={{request.get_full_path|urlencode}}">Login</a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <mark><em>Product is not available</em></mark>
+            {% endif %}
         </div>
       </div>
     {% endfor %}

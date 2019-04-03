@@ -2,8 +2,7 @@ from django.urls import path
 
 from core.views import *
 from core.models import Category
-from core.utils import FormGenerator
-from core.forms import GENERATED_FORMS
+from core.forms import FormGenerator, GENERATED_FORMS
 
 
 app_name = 'core'
@@ -17,7 +16,10 @@ urlpatterns = [
     path('make-order/', MakeOrderView.as_view(), name='make-order'),
     path('products/<str:category>/', ProductsView.as_view(), name='products'),
     path('product/<str:slug>/', ProductDetailView.as_view(), name='product'),
+    path('product/<str:slug>/review/', CreateReviewView.as_view(), name='create-review'),
+    path('product/<str:slug>/review/<int:pk>', UpdateReviewView.as_view(), name='update-review'),
     path('announcement/<str:slug>/', AnnouncementDetailView.as_view(), name='announcement'),
+    
 ]
 
 

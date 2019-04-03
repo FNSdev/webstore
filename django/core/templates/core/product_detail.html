@@ -1,10 +1,36 @@
 {% extends "base.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block title %}
-{{ object.name }}
+    {{ object.name }}
 {% endblock %}
 
 {% block sidebar_left %}
+    <style>
+        td {text-align: center}
+        th {text-align: center}
+    </style>
+
+    <table class="table table-striped ml-5" style="width: 32rem;">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Characteristic</th>
+                <th scope="col">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key, value in object.specifications.items %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{key}}</td>
+                <td>{{value}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 {% endblock %}
 
 {% block main %}
@@ -53,26 +79,136 @@
     {% endif %}
     <div class="card-body">
         <h5 class="card-title">{{ object.price }} BYN</h5>
+        <p align="justify">{{ object.general_info }}</p>
+        {% if object.is_available %}
+            {% if user.is_authenticated %}
+                <form id="buy-form">
+                    <input type="number" min="1" value="1" max="10" id="count">
+                    <p>
+                        <button type="submit" class="btn btn-success mt-2 buy">Add to basket</button>
+                    </p>
+                </form>
+            {% else %}
+                <div class="alert alert-warning">
+                    Please,
+                    <a href="{% url 'user:login' %}?next={{request.get_full_path|urlencode}}">Login</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <mark><em>Product is not available</em></mark>
+        {% endif %}
+
     </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        jQuery(document).on('submit', '#buy-form', function(e) {
+            e.preventDefault()
+            var jq = jQuery.noConflict() 
+            var $this = $(this)
+            var id = '{{object.id}}'
+            var count = $this.children('#count').val()
+           
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'core:add-to-basket' %}",
+                data: {
+                    id: id,
+                    count: count,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                cache: false,
+                success: function(response) {
+                    document.getElementById('products_in_basket_count').innerHTML = response['count']
+                    alert('Success!')
+                },
+                error: function() {
+                    alert('Error!')
+                }
+            })
+        })
+    </script>
+
 </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Characteristic</th>
-            <th scope="col">Value</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for key, value in object.specifications.items %}
-        <tr>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td>{{key}}</td>
-            <td>{{value}}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% endblock %}
+
+{% block sidebar_right %}
+
+    {% load my_tags %}
+
+    {% for review in object_list %}
+        <div class="card text-center mb-3 mr-5">
+            <div class="card-header">
+                <h3>
+                    {% if review.rating == 0 %}
+                        <span class="badge badge-dark">{{review.get_rating_display}}</span>
+                    {% elif review.rating == 1 %}
+                        <span class="badge badge-secondary">{{review.get_rating_display}}</span>
+                    {% elif review.rating == 2 %}
+                        <span class="badge badge-primary">{{review.get_rating_display}}</span>
+                    {% elif review.rating == 3 %}
+                        <span class="badge badge-warning">{{review.get_rating_display}}</span>
+                    {% elif review.rating == 4 %}
+                        <span class="badge badge-success">{{review.get_rating_display}}</span>
+                    {% endif %}
+                </h3>
+
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{review.header}}</h5>
+                <p class="card-text">{{review.body}}</p>
+            </div>
+            <div class="card-footer text-muted">
+                {{review.user.username}}, {{review.date}}
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if is_paginated %}
+        <nav>
+            <ul class="pagination justify-content-center mr-5">
+                <li class="page-item">
+                    <a href="?{% param_replace page=1 %}" class="page-link">
+                        First
+                    </a>
+                </li>
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a href="?{% param_replace page=page_obj.previous_page_number %}" class="page-link">
+                        {{ page_obj.previous_page_number }}
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item active">
+                    <a href="?{% param_replace page=page_obj.number %}" class="page-link">
+                        {{ page_obj.number }}
+                    </a>
+                </li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a href="?{% param_replace page=page_obj.next_page_number %}" class="page-link">
+                        {{ page_obj.next_page_number }}
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item">
+                    <a href="?{% param_replace page=paginator.num_pages %}" class="page-link">
+                        Last
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <form class="mr-5" method="POST" action="{{review_form_url}}">
+            {% csrf_token %}
+            {{ review_form|crispy }}
+            <button class="btn btn-success mt-3">
+                Post Review
+            </button>
+        </form>        
+    {% endif %}
 
 {% endblock %}

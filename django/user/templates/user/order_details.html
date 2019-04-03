@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Order Details
+{% endblock %}
+
+{% block main %}
+    <h2>Order Details</h2>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Count</th>
+                <th scope="col">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product_in_order in products_in_order %}
+            <tr>
+                <td>
+                    <a href="{% url 'core:product' slug=product_in_order.product.slug %}">
+                        {{ product_in_order.product.name }}
+                    </a>
+                </td>
+                <td>
+                    {{ product_in_order.count }}
+                </td>
+                <td>
+                    {{ product_in_order.get_price }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="card text-center">
+        <div class="card-header">
+            {% if order.status == 0 %}
+                <span class="badge badge-warning">{{order.get_status_display}}</span>
+            {% elif order.status == 1 %}                
+                <span class="badge badge-info">{{order.get_status_display}}</span>                
+            {% elif order.status == 2 %}                
+                <span class="badge badge-success">{{order.get_status_display}}</span>               
+            {% elif order.status == 3 %}              
+                <span class="badge badge-danger">{{order.get_status_display}}</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <h4 class="card-title">Total price:</h4>
+            <p class="card-text">{{order.total_price}}</p>
+        </div>
+        <div class="card-footer text-muted">
+            {{order.date}}
+        </div>
+    </div>
+
+{% endblock %}

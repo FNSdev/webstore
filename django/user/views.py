@@ -6,10 +6,12 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.urls import reverse_lazy
 from django.shortcuts import render, reverse, redirect
 from django.contrib import messages
+from django.http import Http404
+from django.core.exceptions import ObjectDoesNotExist
 
 from user.forms import CustomUserCreationForm, CustomUserChangeForm
 from user.models import CustomUser
-from core.models import Order
+from core.models import Order, ProductInOrder
 
 class RegisterView(CreateView):
     form_class = CustomUserCreationForm
@@ -56,3 +58,19 @@ def change_passoword_view(request):
         form = PasswordChangeForm(user=request.user)
 
     return render(request, 'user/change_password.html', {'form': form})
+
+
+class OrderDetailsView(View):
+    def get(self, request, *args, **kwargs):
+        order_id = kwargs['pk']
+
+        try:
+            order = Order.objects.get(id=order_id)
+        except ObjectDoesNotExist:
+            raise Http404
+
+        if order.user == request.user:
+            products = ProductInOrder.objects.filter(order__id=order_id)
+            return render(request, 'user/order_details.html', {'order': order, 'products_in_order': products})
+        else:
+            raise Http404

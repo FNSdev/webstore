@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.postgres.fields import HStoreField, ArrayField
 from django.utils.text import slugify
 
-from core.utils import FormGenerator
-from core.forms import GENERATED_FORMS
 
 from uuid import uuid4
 import time
@@ -14,6 +12,7 @@ class Category(models.Model):
     specifications = HStoreField(default=dict)
 
     def save(self, *args, **kwargs):
+        from core.forms import FormGenerator, GENERATED_FORMS
         old = Category.objects.filter(slug__iexact=self.slug).first()
         print(old)
         if old:
@@ -44,6 +43,7 @@ class Product(models.Model):
     specifications = HStoreField(blank=True, default=dict)
     view_count = models.IntegerField(default=0)
     slug = models.SlugField(blank=True)
+    user_reviews = models.ManyToManyField(to='user.CustomUser', through='Review')
 
     def save(self, *args, **kwargs):
         old = Product.objects.filter(slug__iexact=self.slug).first()
@@ -110,14 +110,17 @@ class Order(models.Model):
         (RECIEVED, 'RECIEVED'),
         (PROCCESSED, 'PROCCESSED'),
         (DELIVERED, 'DELIVERED'),
-        (RECIEVED, 'REJECTED'),
+        (REJECTED, 'REJECTED'),
     )
 
     products = models.ManyToManyField(to=Product, through='ProductInOrder')
     date = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(choices=STATUSES, default=RECIEVED)
     user = models.ForeignKey(to='user.CustomUser', on_delete=models.CASCADE)
-    total_price = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+    total_price = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+
+    class Meta:
+        ordering = ('-date', '-total_price')
 
     def __str__(self):
         return f'order of {self.user.email}, {self.date}'
@@ -127,6 +130,9 @@ class ProductInOrder(models.Model):
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
     order = models.ForeignKey(to=Order, on_delete=models.CASCADE)
     count = models.PositiveIntegerField(default=1)
+
+    def get_price(self):
+        return self.product.price * int(self.count)
 
     def __str__(self):
         return f'{self.product.name} in the {self.order}'
@@ -159,3 +165,41 @@ class Announcement(models.Model):
         return self.header
 
 
+class ReviewManager(models.Manager):
+    def get_review_or_unsaved_blank_review(self, product, user):
+        try:
+            return Review.objects.get(product=product, user=user)
+        except Review.DoesNotExist:
+            return Review(product=product, user=user)
+
+
+class Review(models.Model):
+    VERY_BAD = 0
+    BAD = 1
+    FINE = 2
+    GOOD = 3
+    AWESOME = 4
+
+    RATINGS = (
+        (VERY_BAD, 'Very Bad'),
+        (BAD, 'Bad'),
+        (FINE, 'Fine'),
+        (GOOD, 'Good'),
+        (AWESOME, 'Awesome'),
+    )
+
+    class Meta():
+        ordering = ('-date',)
+        unique_together = ('user', 'product')
+
+    objects = ReviewManager()
+
+    user = models.ForeignKey(to='user.CustomUser', on_delete=models.CASCADE)
+    product = models.ForeignKey(to='Product', on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=RATINGS, default=FINE)
+    header = models.CharField(max_length=60)
+    body = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Review of {self.product.name} from {self.user.username}'
