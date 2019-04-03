@@ -46,11 +46,16 @@
                 Order By
             </button>
             <div class="dropdown-menu dropdown-menu-left" aria-labelledby="dropdownOrder">
-                <a class="dropdown-item" href="?{% param_replace order_by='view_count' remove_page=1 %}">By Popularity</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='rating' remove_page=1 %}">By Rating (from lowest to highest)</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?{% param_replace order_by='price' remove_page=1 %}">By Price</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='-rating' remove_page=1 %}">By Rating (from highest to lowest)</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="?{% param_replace order_by='name' remove_page=1 %}">By Name</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='price' remove_page=1 %}">By Price (from lowest to highest)</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="?{% param_replace order_by='-price' remove_page=1 %}">By Price (from highest to lowest)</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="?{% param_replace order_by='name' remove_page=1 %}">By Name (from 'A' to 'Z')</a>
+                <a class="dropdown-item" href="?{% param_replace order_by='-name' remove_page=1 %}">By Name (from 'Z' to 'A')</a>
             </div>
         </div>
     </div>
