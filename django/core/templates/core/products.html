@@ -55,21 +55,27 @@
         </div>
     </div>
 
-    <ul>
     {% for product in object_list %}
-    <div class="card mt-5" style="width: 20rem;">
+    <div class="border mt-5" style="width: 24rem;">
         {% if product.images.all %}
-            <img src="{{ product.images.first.image.url }}" class="card-img-top mt-3" alt="Error" height="350px">
+            <img src="{{ product.images.first.image.url }}" class="card-img-top mt-3" alt="Error" height="375px">
         {% endif %}
         <div class="card-body">
             <h5 class="card-title">
                 <a href="{% url 'core:product' slug=product.slug %}">
                     {{ product.name }}
                 </a>
-            </h5>
+            </h5>              
+            <div class="star-ratings">
+                    <div class="fill-ratings" style="width: {{product.get_stars}}%;">
+                        <span class="stars-span">★★★★★</span>
+                    </div>
+                    <div class="empty-ratings">
+                        <span>★★★★★</span>
+                    </div>
+                </div> 
             <h4 class="card-text">{{ product.price }} BYN</h4>
-            <p align="justify">{{ product.general_info }}</p>
-
+            <p align="justify">{{ product.general_info }}</p>                      
             {% if product.is_available %}
                 {% if user.is_authenticated %}
                     <form class="buy-form" id="{{product.id}}">
@@ -86,9 +92,8 @@
                 <mark><em>Product is not available</em></mark>
             {% endif %}
         </div>
-      </div>
+    </div>
     {% endfor %}
-    </ul>
 
     {% if is_paginated %}
     <nav>
@@ -153,6 +158,13 @@
                 }
             })
         })
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            var star_rating_width = $('.fill-ratings span').width();
+            $('.star-ratings').width(star_rating_width);
+        });
     </script>
 
 {% endblock %}

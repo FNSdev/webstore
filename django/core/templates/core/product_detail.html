@@ -35,11 +35,19 @@
 
 {% block main %}
 
-<div class="card mb-5" style="width: 30rem;">
+<div class="card" style="width: 30rem;">
     <div class="card-header">
         <h4>
             {{ object.name }}
         </h4>
+        <div class="star-ratings">
+            <div class="fill-ratings" style="width: {{object.get_stars }}%;">
+                <span class="stars-span">★★★★★</span>
+            </div>
+            <div class="empty-ratings">
+                <span>★★★★★</span>
+            </div>
+        </div>
     </div>
     {% if object.images.all %}
     <div class="card-img-top mt-3">
@@ -127,6 +135,13 @@
                 }
             })
         })
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            var star_rating_width = $('.fill-ratings span').width();
+            $('.star-ratings').width(star_rating_width);
+        });
     </script>
 
 </div>

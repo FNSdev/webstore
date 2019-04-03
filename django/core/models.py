@@ -41,9 +41,9 @@ class Product(models.Model):
     general_info = models.TextField(blank=True)
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE, related_name='products')
     specifications = HStoreField(blank=True, default=dict)
-    view_count = models.IntegerField(default=0)
     slug = models.SlugField(blank=True)
     user_reviews = models.ManyToManyField(to='user.CustomUser', through='Review')
+    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
 
     def save(self, *args, **kwargs):
         old = Product.objects.filter(slug__iexact=self.slug).first()
@@ -54,8 +54,20 @@ class Product(models.Model):
             self.slug = slugify(f'{self.name}-{int(time.time())}')
         super().save(*args, **kwargs)
 
+    def update_rating(self):
+        reviews = Review.objects.filter(product=self)
+        total = 0
+        for review in reviews:
+            total += (review.rating + 1)
+        total = total / len(reviews)
+        self.rating = total
+        self.save()
+
+    def get_stars(self):
+        return self.rating * 20
+
     class Meta:
-        ordering = ('-view_count', 'name')
+        ordering = ('-rating', 'name')
 
     def __str__(self):
         return f'{self.name}'

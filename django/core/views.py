@@ -113,8 +113,6 @@ class ProductDetailView(ListView):
     def get_object(self):
         slug = self.kwargs.get('slug')
         product = get_object_or_404(Product, slug__iexact=slug)
-        product.view_count += 1
-        product.save()
         return product
         
 
@@ -130,6 +128,7 @@ class CreateReviewView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         product_slug = self.object.product.slug
+        self.object.product.update_rating()
         return reverse('core:product', kwargs={'slug': product_slug})
 
     def render_to_response(self, context, **response_kwargs):
@@ -150,6 +149,7 @@ class UpdateReviewView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         product_slug = self.object.product.slug
+        self.object.product.update_rating()
         return reverse('core:product', kwargs={'slug': product_slug})
 
     def render_to_response(self, context, **response_kwargs):
