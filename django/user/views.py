@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from user.forms import CustomUserCreationForm, CustomUserChangeForm
 from user.models import CustomUser
-from core.models import Order, ProductInOrder
+from core.models import Order, ProductInOrder, Review
 
 class RegisterView(CreateView):
     form_class = CustomUserCreationForm
@@ -27,11 +27,22 @@ class ProfileView(LoginRequiredMixin, View):
 class OrdersView(LoginRequiredMixin, ListView):
     template_name = 'user/orders.html'
     model = Order
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = Order.objects.filter(user=self.request.user)
+        return queryset
+
+
+class ReviewsView(LoginRequiredMixin, ListView):
+    template_name = 'user/reviews.html'
+    model = Review
     paginate_by = 5
 
     def get_queryset(self):
-        queryset = Order.objects.filter(user__id=self.request.user.id)
+        queryset = Review.objects.filter(user=self.request.user)
         return queryset
+    
 
 
 class UpdateProfileView(LoginRequiredMixin, UpdateView):

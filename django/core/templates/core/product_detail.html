@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load crispy_forms_tags %}
+{% load my_tags %}
 
 {% block title %}
     {{ object.name }}
@@ -149,9 +150,6 @@
 {% endblock %}
 
 {% block sidebar_right %}
-
-    {% load my_tags %}
-
     {% for review in object_list %}
         <div class="card text-center mb-3 mr-5">
             <div class="card-header">

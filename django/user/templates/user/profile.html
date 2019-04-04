@@ -6,20 +6,20 @@ Profile
 
 {% block sidebar_left %}
     <div class="card" style="width: 24rem;">
-        <!----div class="card-header">
+        <div class="card-header">
             <h4>
-                Categories
+                My Activity
             </h4>
-        </div-->
+        </div>
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <a href="{% url 'user:orders' %}">
-                    My Orders
+                    Orders
                 </a>
             </li>
             <li class="list-group-item">
-                <a href="{% url 'user:orders' %}">
-                    My Reviews
+                <a href="{% url 'user:reviews' %}">
+                    Reviews
                 </a>
             </li>
         </ul>
@@ -31,11 +31,7 @@ Profile
         td {text-align: center}
         th {text-align: center}
     </style>
-
-    <h4>
-        General Information
-    </h4>
-    
+   
     <table class="table table-striped">
         <thead>
             <tr>

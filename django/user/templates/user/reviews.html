@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load my_tags %}
+
+{% block title %}
+    My Reviews
+{% endblock title %}
+
+{% block main %}
+    {% for review in object_list %}
+        <div class="card text-center mb-5">
+            <div class="card-header">
+                <h3>
+                    {% if review.rating == 0 %}
+                        <span class="badge badge-dark">{{review.get_rating_display}}</span>
+                    {% elif review.rating == 1 %}
+                        <span class="badge badge-secondary">{{review.get_rating_display}}</span>
+                    {% elif review.rating == 2 %}
+                        <span class="badge badge-primary">{{review.get_rating_display}}</span>
+                    {% elif review.rating == 3 %}
+                        <span class="badge badge-warning">{{review.get_rating_display}}</span>
+                    {% elif review.rating == 4 %}
+                        <span class="badge badge-success">{{review.get_rating_display}}</span>
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{review.header}}</h5>
+                <p class="card-text">{{review.body}}</p>
+            </div>
+            <div class="card-footer text-muted">
+                <a href="{% url 'core:product' slug=review.product.slug %}">{{review.product}}</a>, {{review.date}}
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if is_paginated %}
+        <nav>
+            <ul class="pagination justify-content-center mr-5">
+                <li class="page-item">
+                    <a href="?{% param_replace page=1 %}" class="page-link">
+                        First
+                    </a>
+                </li>
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a href="?{% param_replace page=page_obj.previous_page_number %}" class="page-link">
+                        {{ page_obj.previous_page_number }}
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item active">
+                    <a href="?{% param_replace page=page_obj.number %}" class="page-link">
+                        {{ page_obj.number }}
+                    </a>
+                </li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a href="?{% param_replace page=page_obj.next_page_number %}" class="page-link">
+                        {{ page_obj.next_page_number }}
+                    </a>
+                </li>
+                {% endif %}
+                <li class="page-item">
+                    <a href="?{% param_replace page=paginator.num_pages %}" class="page-link">
+                        Last
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+
+{% endblock main %}
