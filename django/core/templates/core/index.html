@@ -13,64 +13,29 @@
 {% endblock %}
 
 {% block main %}
-
-{% for announcement in object_list %}
-    <div class="card mb-5" style="width: 26rem;">
-        <div class="card-header">
-            <h4>
-                {{ announcement.header }}
-            </h4>
+    {% for announcement in object_list %}
+        <div class="card mb-5" style="width: 26rem;">
+            <div class="card-header">
+                <h4>
+                    {{ announcement.header }}
+                </h4>
+            </div>
+            {% if announcement.image %}
+                <img src="{{ announcement.image.url }}" class="card-img-top mt-3" alt="Error" height="200px">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ announcement.body|truncatewords:15 }}</h5>
+                <a href="{% url 'core:announcement' slug=announcement.slug %}" class="btn btn-primary">Read</a>
+            </div>
+            <div class="card-footer">
+                <h4>
+                    {{ announcement.date }}
+                </h4>
+            </div>
         </div>
-        {% if announcement.image %}
-            <img src="{{ announcement.image.url }}" class="card-img-top mt-3" alt="Error" height="200px">
-        {% endif %}
-        <div class="card-body">
-            <h5 class="card-title">{{ announcement.body|truncatewords:15 }}</h5>
-            <a href="{% url 'core:announcement' slug=announcement.slug %}" class="btn btn-primary">Read</a>
-        </div>
-        <div class="card-footer">
-            <h4>
-                {{ announcement.date }}
-            </h4>
-        </div>
-    </div>
-{% endfor %}
+    {% endfor %}
 </ul>
 
+{% include 'core/includes/pagination.html' %}
 
-{% if is_paginated %}
-<nav>
-    <ul class="pagination justify-content-center">
-        <li class="page-item">
-            <a href="?{% param_replace page=1 %}" class="page-link">
-                First
-            </a>
-        </li>
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a href="?{% param_replace page=page_obj.previous_page_number %}" class="page-link">
-                {{ page_obj.previous_page_number }}
-            </a>
-        </li>
-        {% endif %}
-        <li class="page-item active">
-            <a href="?{% param_replace page=page_obj.number %}" class="page-link">
-                {{ page_obj.number }}
-            </a>
-        </li>
-        {% if page_obj.has_next %}
-        <li class="page-item">
-            <a href="?{% param_replace page=page_obj.next_page_number %}" class="page-link">
-                {{ page_obj.next_page_number }}
-            </a>
-        </li>
-        {% endif %}
-        <li class="page-item">
-            <a href="?{% param_replace page=paginator.num_pages %}" class="page-link">
-                Last
-            </a>
-        </li>
-    </ul>
-</nav>
-{% endif %}
 {% endblock %}

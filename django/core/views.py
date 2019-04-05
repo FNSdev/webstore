@@ -24,6 +24,22 @@ class IndexView(ListView):
         return ctx
 
 
+class SearchView(ListView):
+    paginate_by = 10
+    model = Product
+    template_name = 'core/search.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['search'] = self.request.GET.get('search')
+        ctx['categories'] = Category.objects.all()
+        return ctx
+
+    def get_queryset(self):
+        name = self.request.GET.get('search')
+        qs = Product.objects.filter(name__icontains=name)
+        return qs
+
 class ProductsView(ListView):    
     paginate_by = 10
     model = Product
@@ -45,6 +61,9 @@ class ProductsView(ListView):
 
         query_dict = self.request.GET
         args = query_dict.dict()
+
+        qs = cat.products.all()
+
         order_by = False
                 
         if args.get('paginate_by'):
@@ -57,13 +76,10 @@ class ProductsView(ListView):
 
         for k in [k for k, v in args.items() if not v]:
             del args[k]
-
-        temp_qs = cat.products.all()
-        qs = cat.products.all()
-
+        
         #TODO it might work very slow, need to think more
         if args:
-            for product in temp_qs:
+            for product in qs:
                 specs = product.specifications
                 lower_case_specs = {}
                 for k, v in specs.items():

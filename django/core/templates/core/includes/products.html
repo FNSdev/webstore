@@ -1,0 +1,79 @@
+{% load crispy_forms_tags %}
+
+{% for product in object_list %}
+    <div class="border mt-5" style="width: 24rem;">
+        {% if product.images.all %}
+            <img src="{{ product.images.first.image.url }}" class="card-img-top mt-3" alt="Error" height="375px">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">
+                <a href="{% url 'core:product' slug=product.slug %}">
+                    {{ product.name }}
+                </a>
+            </h5>              
+            <div class="star-ratings">
+                    <div class="fill-ratings" style="width: {{product.get_stars}}%;">
+                        <span class="stars-span">★★★★★</span>
+                    </div>
+                    <div class="empty-ratings">
+                        <span>★★★★★</span>
+                    </div>
+                </div> 
+            <h4 class="card-text">{{ product.price }} BYN</h4>
+            <p align="justify">{{ product.general_info }}</p>                      
+            {% if product.is_available %}
+                {% if user.is_authenticated %}
+                    <form class="buy-form" id="{{product.id}}">
+                        <input type="number" min="1" max="10" value="1" class="count">
+                        <p>
+                            <button type="submit" class="btn btn-success mt-2 buy">Add to basket</button>
+                        </p>
+                    </form> 
+                {% else %}
+                    <div class="alert alert-warning" role="alert"> 
+                        Please,
+                        <a href="{% url 'user:login' %}?next={{request.get_full_path|urlencode}}">Login</a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <mark><em>Product is not available</em></mark>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    jQuery(document).on('submit', '.buy-form', function(e) {
+        e.preventDefault()
+        var jq = jQuery.noConflict() 
+        var $this = $(this)
+        var id = $this.attr('id')
+        var count = $this.children('.count').val()
+           
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'core:add-to-basket' %}",
+            data: {
+                id: id,
+                count: count,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            cache: false,
+            success: function(response) {
+                document.getElementById('products_in_basket_count').innerHTML = response['count']
+                alert('Success!')
+            },
+            error: function() {
+                alert('Error!')
+            }
+        })
+    })
+</script>
+
+<script>
+    $(document).ready(function() {
+        var star_rating_width = $('.fill-ratings span').width();
+        $('.star-ratings').width(star_rating_width);
+    });
+</script>

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block sidebar_left %}
+    {% include 'core/includes/categories.html' %}
+{% endblock sidebar_left %}
+
+{% block title %}
+    Search
+{% endblock title %}
+
+{% block main %}
+    <h2>
+        That`s what we have found for: "{{search}}"
+    </h2>
+
+    {% include 'core/includes/products.html' %}
+
+    {% include 'core/includes/pagination.html' %}
+
+{% endblock main %}
