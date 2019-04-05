@@ -35,7 +35,6 @@ class ProductsView(ListView):
 
         args = self.request.GET.dict()
         category_slug = self.kwargs['category']
-        print(category_slug)
 
         ctx['filter_form'] = GENERATED_FORMS[category_slug](initial=args)
         return ctx
@@ -59,7 +58,20 @@ class ProductsView(ListView):
         for k in [k for k, v in args.items() if not v]:
             del args[k]
 
-        qs = cat.products.filter(specifications__contains=args)
+        temp_qs = cat.products.all()
+        qs = cat.products.all()
+
+        #TODO it might work very slow, need to think more
+        if args:
+            for product in temp_qs:
+                specs = product.specifications
+                lower_case_specs = {}
+                for k, v in specs.items():
+                    lower_case_specs[k.lower()] = v.lower()
+                for k, v in args.items():
+                    if lower_case_specs.get(k.lower()) != v.lower():
+                        qs = qs.exclude(id=product.id)
+            
         if order_by:
             qs = qs.order_by(order_by)
 
