@@ -71,6 +71,7 @@ class ProductsView(ListView):
                 for k, v in args.items():
                     if lower_case_specs.get(k.lower()) != v.lower():
                         qs = qs.exclude(id=product.id)
+                        break
             
         if order_by:
             qs = qs.order_by(order_by)
