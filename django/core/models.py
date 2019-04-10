@@ -6,6 +6,8 @@ from django.utils.text import slugify
 from uuid import uuid4
 import time
 
+MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT = 10
+
 class Category(models.Model):
     name = models.CharField(max_length=40)
     slug = models.SlugField(max_length=40, blank=True)

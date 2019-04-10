@@ -24,7 +24,7 @@
             {% if product.is_available %}
                 {% if user.is_authenticated %}
                     <form class="buy-form" id="{{product.id}}">
-                        <input type="number" min="1" max="10" value="1" class="count">
+                        <input type="number" min="1" max="{{max_cnt}}" value="1" class="count">
                         <p>
                             <button type="submit" class="btn btn-success mt-2 buy">Add to basket</button>
                         </p>

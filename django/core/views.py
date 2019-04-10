@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 
 from core.models import Category, Product, Announcement, ProductInBasket, Order, ProductInOrder, Review
+from core.models import MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
 from user.models import CustomUser
 from core.forms import GENERATED_FORMS, ReviewForm
 
@@ -40,6 +41,7 @@ class SearchView(ListView):
         qs = Product.objects.filter(name__icontains=name)
         return qs
 
+
 class ProductsView(ListView):    
     paginate_by = 10
     model = Product
@@ -53,6 +55,7 @@ class ProductsView(ListView):
         category_slug = self.kwargs['category']
 
         ctx['filter_form'] = GENERATED_FORMS[category_slug](initial=args)
+        ctx['max_cnt'] = MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
         return ctx
 
     def get_queryset(self):
@@ -118,6 +121,7 @@ class ProductDetailView(ListView):
         ctx = super().get_context_data(**kwargs)
         obj = self.get_object()
         ctx['object'] = obj
+        ctx['max_cnt'] = MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
 
         if self.request.user.is_authenticated:
             review = Review.objects.get_review_or_unsaved_blank_review(
@@ -210,15 +214,21 @@ class UpdateBasketView(LoginRequiredMixin, View):
     login_url = '/user/login'
 
     def post(self, request, *args, **kwargs):
+        print('updating basket!')
+
         basket = request.user.basket 
         pairs = request.POST['pairs']
 
         pairs = ast.literal_eval(pairs)
         
         for key, value in pairs.items():
-            product_in_basket = ProductInBasket.objects.get(id__iexact=key)
-            product_in_basket.count = int(value)
-            product_in_basket.save()
+            val = int(value)
+            if val > 0 and val <= MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT:
+                product_in_basket = ProductInBasket.objects.get(id=key)
+                product_in_basket.count = val
+                product_in_basket.save()
+            else:
+                print('Wrong value!')
 
         return JsonResponse({})
 
@@ -248,7 +258,15 @@ class BasketView(LoginRequiredMixin, View):
         basket = request.user.basket
         products = ProductInBasket.objects.filter(basket__id=basket.id)
 
-        return render(request, 'core/basket.html', {'products': products, 'total': basket.get_total_price()})
+        return render(
+            request,
+            'core/basket.html',
+            {
+                'products': products,
+                'total': basket.get_total_price(),
+                'max_cnt': MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
+            }
+        )
 
 
 class ConfirmOrderView(LoginRequiredMixin, View):
