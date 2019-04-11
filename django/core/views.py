@@ -6,12 +6,16 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 
-from core.models import Category, Product, Announcement, ProductInBasket, Order, ProductInOrder, Review
+from core.models import Category, Product, Announcement, ProductInBasket, Order, ProductInOrder, Review, Coupone
 from core.models import MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
 from user.models import CustomUser
 from core.forms import GENERATED_FORMS, ReviewForm
 
 import ast
+import re
+
+
+UUID4_PATTERN = r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
 
 
 class IndexView(ListView):
@@ -214,10 +218,9 @@ class UpdateBasketView(LoginRequiredMixin, View):
     login_url = '/user/login'
 
     def post(self, request, *args, **kwargs):
-        print('updating basket!')
-
         basket = request.user.basket 
         pairs = request.POST['pairs']
+        code = request.POST['code']
 
         pairs = ast.literal_eval(pairs)
         
@@ -227,8 +230,11 @@ class UpdateBasketView(LoginRequiredMixin, View):
                 product_in_basket = ProductInBasket.objects.get(id=key)
                 product_in_basket.count = val
                 product_in_basket.save()
-            else:
-                print('Wrong value!')
+
+        if re.fullmatch(UUID4_PATTERN, code):
+            if Coupone.objects.get(code=code):
+                basket.coupone_code = code
+                basket.save()
 
         return JsonResponse({})
 
@@ -264,7 +270,8 @@ class BasketView(LoginRequiredMixin, View):
             {
                 'products': products,
                 'total': basket.get_total_price(),
-                'max_cnt': MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
+                'max_cnt': MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT,
+                'code': basket.coupone_code,
             }
         )
 
@@ -275,11 +282,21 @@ class ConfirmOrderView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         basket = request.user.basket
         products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
+        total = basket.get_total_price()
 
-        return render(
-            request, 'core/confirm_order.html',
-            {'products_in_basket' : products_in_basket, 'total': basket.get_total_price()}
-        )
+        ctx = {
+            'products_in_basket': products_in_basket,
+            'total': total,
+        }
+
+        code = basket.coupone_code
+        if code:
+            discount = Coupone.objects.get(code=code).discount
+            ctx['discount'] = discount
+            total = round(float(total) * (1 - discount / 100), 2)
+            ctx['total_with_discount'] = total
+
+        return render(request, 'core/confirm_order.html', ctx)
 
 
 class MakeOrderView(LoginRequiredMixin, View):
@@ -290,8 +307,18 @@ class MakeOrderView(LoginRequiredMixin, View):
         basket = user.basket
 
         products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
+        total = basket.get_total_price()
+        code = basket.coupone_code
+        discount = 0
 
-        order = Order.objects.create(user=user, total_price=basket.get_total_price())
+        if code:
+            coupone = Coupone.objects.get(code=code)
+            discount = coupone.discount
+            total = round(float(total) * (1 - discount / 100), 2)
+            basket.coupone_code = None
+            coupone.delete()
+
+        order = Order.objects.create(user=user, total_price=total, discount=discount)
 
         for product_in_basket in products_in_basket.all():
             ProductInOrder.objects.create(
