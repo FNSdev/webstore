@@ -41,19 +41,27 @@
         </tbody>
     </table>
 
-    <h4 id="total-price" align='right'>
-        Total price: {{total}}
-    </h4>
-
-    {% if products %}
-        <div align="right">
-            <button id="order-button" class="btn-lg btn-success">
-                Order
-            </button>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6" align="left">
+                <h4>
+                    Enter your promo code: 
+                </h4>
+                <input type="string" id="code" value="{{code}}" style="width: 350px;">
+            </div>
+            <div class="col-6" align="right">
+                <h4 id="total-price" align='right'>
+                    Total price: {{total}}
+                </h4>
+                {% if products %}
+                    <button id="order-button" class="btn-lg btn-success">
+                        Order
+                    </button>
+                {% endif %}
+            </div>
         </div>
-    {% endif %}
-
-   
+    </div> 
+  
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <script>
@@ -111,6 +119,7 @@
             var data = {}
 
             data['pairs'] = {}
+            data['code'] = document.getElementById('code').value
 
             var children_rows = Array.from(document.getElementsByClassName('r'))
             var childern_forms_input = Array.from(document.getElementsByClassName('count'))
@@ -142,6 +151,7 @@
             var correct = true
 
             data['pairs'] = {}
+            data['code'] = document.getElementById('code').value
 
             var children_rows = Array.from(document.getElementsByClassName('r'))
             var childern_forms_input = Array.from(document.getElementsByClassName('count'))
@@ -166,10 +176,8 @@
             if(correct)
             {
                 data['pairs'] = JSON.stringify(data['pairs'])
-
                 data['csrfmiddlewaretoken'] = '{{ csrf_token }}'
 
-                // jQuery(window).off('onbeforeunload')
                 flag=true
                 $.ajax({
                     type: 'POST',

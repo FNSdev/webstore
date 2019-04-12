@@ -71,9 +71,18 @@
     </table>
 
     <h4>
-        <div class="alert alert-info" role="alert">
-            Total Payment: {{ total }}
-        </div>
+        {% if discount %}
+            <div class="alert alert-success">
+                Your discount: {{ discount }} %
+            </div>
+            <div class="alert alert-info" role="alert">
+                Total Payment: <del>{{total}}</del> {{ total_with_discount }}
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Total Payment: {{ total }}
+            </div>
+        {% endif %}
     </h4>
 
     <div align="right">

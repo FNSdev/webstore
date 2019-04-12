@@ -14,6 +14,10 @@ class ProductAdmin(admin.ModelAdmin):
 class AnnouncementAdmin(admin.ModelAdmin):
     model = Announcement
     readonly_fields = ['slug']
+
+class CouponeAdmin(admin.ModelAdmin):
+    model = Coupone
+    readonly_fields = ['code']
     
 
 admin.site.register(Basket)
@@ -25,3 +29,4 @@ admin.site.register(Announcement, AnnouncementAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(ProductInOrder)
 admin.site.register(Review)
+admin.site.register(Coupone, CouponeAdmin)
