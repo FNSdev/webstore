@@ -15,6 +15,8 @@ class FormGenerator():
                 params[key] = forms.CharField(max_length=40, required=False)
             elif value == 'int':
                 params[key] = forms.IntegerField(required=False)
+            else:
+                raise ValueError(f'Field type {value} is not supported')
 
         name = slug + '_form'
         form = type(name, (forms.Form,), params)
