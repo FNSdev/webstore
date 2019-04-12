@@ -22,7 +22,7 @@ RUN bash /webstore/scripts/pip_install.sh /webstore
 RUN bash /webstore/scripts/collect_static.sh /webstore
 
 # configure Nginx
-COPY nginx/mymdb.conf /etc/nginx/sites-available/webstore.conf
+COPY nginx/webstore.conf /etc/nginx/sites-available/webstore.conf
 RUN rm /etc/nginx/sites-enabled/*
 RUN ln -s /etc/nginx/sites-available/webstore.conf /etc/nginx/sites-enabled/webstore.conf
 COPY runit/nginx /etc/service/nginx
