@@ -29,7 +29,7 @@ COPY runit/nginx /etc/service/nginx
 RUN chmod +x /etc/service/nginx/run
 
 # configure uWSGI
-COPY uwsgi/mymdb.ini /etc/uwsgi/apps-enabled/webstore.ini
+COPY uwsgi/webstore.ini /etc/uwsgi/apps-enabled/webstore.ini
 RUN mkdir -p /var/log/uwsgi
 RUN touch /var/log/uwsgi/webstore.log
 RUN chown www-data /var/log/uwsgi/webstore.log

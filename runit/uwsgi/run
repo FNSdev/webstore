@@ -26,7 +26,7 @@ popd
 
 exec /sbin/setuser www-data \
     uwsgi \
-    --ini /etc/uwsgi/apps-enabled/mymdb.ini \
-    >> /var/log/uwsgi/mymdb.log \
+    --ini /etc/uwsgi/apps-enabled/webstore.ini \
+    >> /var/log/uwsgi/webstore.log \
     2>&1
 
