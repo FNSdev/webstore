@@ -19,6 +19,5 @@ urlpatterns = [
     path('product/<str:slug>/', ProductDetailView.as_view(), name='product'),
     path('product/<str:slug>/review/', CreateReviewView.as_view(), name='create-review'),
     path('product/<str:slug>/review/<int:pk>', UpdateReviewView.as_view(), name='update-review'),
-    path('announcement/<str:slug>/', AnnouncementDetailView.as_view(), name='announcement'),
-    
+    path('announcement/<str:slug>/', AnnouncementDetailView.as_view(), name='announcement'),    
 ]
