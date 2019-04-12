@@ -47,8 +47,12 @@
             {% endif %}
         </div>
         <div class="card-body">
-            <h4 class="card-title">Total price:</h4>
-            <p class="card-text">{{order.total_price}}</p>
+            <div class="alert alert-success">
+                Discount: {{ order.discount }} %
+            </div>
+            <div class="alert alert-info" role="alert">
+                Total Payment: {{ order.total_price }}
+            </div>
         </div>
         <div class="card-footer text-muted">
             {{order.date}}

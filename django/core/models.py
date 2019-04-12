@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import HStoreField, ArrayField
 from django.utils.text import slugify
+from django.core.validators import MaxValueValidator
 
 
 from uuid import uuid4
@@ -90,6 +91,7 @@ class ProductImage(models.Model):
 class Basket(models.Model):
     products = models.ManyToManyField(to=Product, through='ProductInBasket')   
     total_count = models.PositiveIntegerField(default=0)
+    coupone_code = models.UUIDField(null=True, blank=True)
 
     def get_total_price(self):
         total = 0
@@ -100,6 +102,11 @@ class Basket(models.Model):
 
     def __str__(self):
         return f'basket of {self.customuser.email}'
+
+
+class Coupone(models.Model):
+    discount = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100)])
+    code = models.UUIDField(default=uuid4, editable=False)
 
 
 class ProductInBasket(models.Model):
@@ -129,9 +136,11 @@ class Order(models.Model):
 
     products = models.ManyToManyField(to=Product, through='ProductInOrder')
     date = models.DateTimeField(auto_now_add=True)
-    status = models.IntegerField(choices=STATUSES, default=RECIEVED)
+    status = models.IntegerField(choices=STATUSES, default=RECIEVED)    
     user = models.ForeignKey(to='user.CustomUser', on_delete=models.CASCADE)
+    discount = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100)])
     total_price = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+    price_with_discount = models.DecimalField(max_digits=9, decimal_places=2, default=0)
 
     class Meta:
         ordering = ('-date', '-total_price')
