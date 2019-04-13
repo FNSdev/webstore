@@ -4,8 +4,10 @@ import sys
 class CoreConfig(AppConfig):
     name = 'core'
     def ready(self):
-        if 'collectstatic' in sys.argv:
-            return True
+        not_a_run_server = {'collectstatic', 'makemigrations', 'migrate'}
+        for command in not_a_run_server:
+            if command in sys.argv
+                return True
         
         from core.models import Category
         from core.forms import FormGenerator, GENERATED_FORMS
