@@ -6,7 +6,7 @@ class CoreConfig(AppConfig):
     def ready(self):
         not_a_run_server = {'collectstatic', 'makemigrations', 'migrate'}
         for command in not_a_run_server:
-            if command in sys.argv
+            if command in sys.argv:
                 return True
         
         from core.models import Category
