@@ -17,11 +17,10 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         from core.forms import FormGenerator, GENERATED_FORMS
         old = Category.objects.filter(slug__iexact=self.slug).first()
-        print(old)
         if old:
             if old.name != self.name:
                 self.slug = slugify(f'{self.name}-{int(time.time())}')
-            if old.specifications != self.specifications:
+            if old.name != self.name or old.specifications != self.specifications:
                 form = FormGenerator.generate(self.slug, self.specifications)
                 GENERATED_FORMS[self.slug] = form
         else:  
