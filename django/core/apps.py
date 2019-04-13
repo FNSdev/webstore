@@ -16,6 +16,7 @@ class CoreConfig(AppConfig):
         for cat in categories:
             specs = cat.specifications
             specs = specs.replace('=>', ':')
+            specs = '{' + specs + '}'
             specs = ast.literal_eval(specs)
             form = FormGenerator.generate(cat.slug, specs)
             GENERATED_FORMS[cat.slug] = form
