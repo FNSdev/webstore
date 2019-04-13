@@ -10,7 +10,10 @@ class FormGenerator():
     @staticmethod
     def generate(slug, specifications):
         params = {}
-     
+
+        if isinstance(specifications, str):
+            raise ValueError(f'WRONG TYPE: {specifications} is a string')
+
         for key, value in specifications.items():
             if value == 'str':
                 params[key] = forms.CharField(max_length=40, required=False)
