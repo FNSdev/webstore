@@ -10,8 +10,7 @@ class FormGenerator():
     @staticmethod
     def generate(slug, specifications):
         params = {}
-        specifications = ast.literal_eval(specifications)
-    
+     
         for key, value in specifications.items():
             if value == 'str':
                 params[key] = forms.CharField(max_length=40, required=False)
