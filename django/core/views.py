@@ -58,7 +58,9 @@ class ProductsView(ListView):
         args = self.request.GET.dict()
         category_slug = self.kwargs['category']
 
-        ctx['filter_form'] = GENERATED_FORMS[category_slug](initial=args)
+        form = GENERATED_FORMS.get(category_slug)
+        if form:
+            ctx['filter_form'] = form(initial=args)
         ctx['max_cnt'] = MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
         return ctx
 
