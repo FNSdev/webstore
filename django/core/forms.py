@@ -10,7 +10,7 @@ class FormGenerator():
     @staticmethod
     def generate(slug, specifications):
         params = {}
-        specifiactions = ast.literal_eval(specifiactions)
+        specifications = ast.literal_eval(specifications)
     
         for key, value in specifications.items():
             if value == 'str':
