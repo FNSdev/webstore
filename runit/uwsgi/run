@@ -30,7 +30,3 @@ exec /sbin/setuser www-data \
     --ini /etc/uwsgi/apps-enabled/webstore.ini \
     >> /var/log/uwsgi/webstore.log \
     2>&1
-
-pushd /webstore/django
-    python manage.py generate_forms    
-popd
