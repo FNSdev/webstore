@@ -77,7 +77,7 @@ class Product(models.Model):
 
 
 def product_image_upload_path(instance, filename):
-    return f'{instance.product.name} / {uuid4()}'
+    return f'{instance.product_name}/{uuid4()}'
 
 
 class ProductImage(models.Model):
@@ -162,7 +162,7 @@ class ProductInOrder(models.Model):
 
 
 def announcement_image_upload_path(instance, filename):
-    return f'{instance.header} / {uuid4()}'
+    return f'{instance.header}/{uuid4()}'
 
 
 class Announcement(models.Model):
