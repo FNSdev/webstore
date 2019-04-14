@@ -4,9 +4,8 @@ FROM phusion/baseimage:0.11
 RUN mkdir /webstore
 WORKDIR /webstore
 RUN apt-get -y update
-RUN add-apt-repository ppa:certbot/certbot
-RUN sudo apt-get update
-RUN apt-get install certbot python-certbot-nginx 
+RUN add-apt-repository -y ppa:certbot/certbot
+RUN apt-get -y update
 RUN apt-get install -y \
     nginx \
     postgresql-client \
