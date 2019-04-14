@@ -4,12 +4,16 @@ FROM phusion/baseimage:0.11
 RUN mkdir /webstore
 WORKDIR /webstore
 RUN apt-get -y update
+RUN add-apt-repository ppa:certbot/certbot
+RUN sudo apt-get update
+RUN apt-get install certbot python-certbot-nginx 
 RUN apt-get install -y \
     nginx \
     postgresql-client \
     python3 \
     python3-pip \
-    python3-venv
+    python3-venv \
+    certbot python-certbot-nginx
 COPY requirements* /webstore/
 COPY django/ /webstore/django
 COPY bash_scripts/ /webstore/scripts
@@ -27,6 +31,7 @@ RUN rm /etc/nginx/sites-enabled/*
 RUN ln -s /etc/nginx/sites-available/webstore.conf /etc/nginx/sites-enabled/webstore.conf
 COPY runit/nginx /etc/service/nginx
 RUN chmod +x /etc/service/nginx/run
+RUN certbot --nginx -d fnswebstore.xyz -d www.fnswebstore.xyz
 
 # configure uWSGI
 COPY uwsgi/webstore.ini /etc/uwsgi/apps-enabled/webstore.ini
