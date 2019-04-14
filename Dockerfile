@@ -30,7 +30,7 @@ RUN rm /etc/nginx/sites-enabled/*
 RUN ln -s /etc/nginx/sites-available/webstore.conf /etc/nginx/sites-enabled/webstore.conf
 COPY runit/nginx /etc/service/nginx
 RUN chmod +x /etc/service/nginx/run
-RUN certbot -m fnsdevelopment@gmail.com --nginx -d fnswebstore.xyz -d www.fnswebstore.xyz
+RUN certbot -m fnsdevelopment@gmail.com --non-interactive --agree-tos --redirect --nginx -d fnswebstore.xyz -d www.fnswebstore.xyz
 
 # configure uWSGI
 COPY uwsgi/webstore.ini /etc/uwsgi/apps-enabled/webstore.ini
