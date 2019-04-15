@@ -11,8 +11,7 @@ class CustomUser(AbstractUser):
     city = models.CharField(max_length=30)
     address = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=13)
-    basket = models.OneToOneField(to='core.Basket', on_delete=models.CASCADE, null=True, blank=True)
-    
+        
     def save(self, *args, **kwargs):
         is_new = False if self.id else True
         if is_new:
@@ -21,7 +20,6 @@ class CustomUser(AbstractUser):
             basket.save()
             self.basket = basket
         super(CustomUser, self).save(*args, **kwargs)
-
 
     def __str__(self):
         return self.email

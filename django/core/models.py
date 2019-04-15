@@ -91,6 +91,7 @@ class Basket(models.Model):
     products = models.ManyToManyField(to=Product, through='ProductInBasket')   
     total_count = models.PositiveIntegerField(default=0)
     coupone_code = models.UUIDField(null=True, blank=True)
+    user = models.OneToOneField(to='user.CustomUser', on_delete=models.CASCADE, null=True, blank=True)
 
     def get_total_price(self):
         total = 0
