@@ -14,12 +14,13 @@ class CustomUser(AbstractUser):
         
     def save(self, *args, **kwargs):
         is_new = False if self.id else True
+        super(CustomUser, self).save(*args, **kwargs)
         if is_new:
             Basket = apps.get_model('core', 'Basket')
             basket = Basket()
             basket.user = self
             basket.save()
-        super(CustomUser, self).save(*args, **kwargs)
+
 
     def __str__(self):
         return self.email

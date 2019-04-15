@@ -100,8 +100,8 @@ class Basket(models.Model):
             total += product.product.price * product.count
         return total
 
-    """def __str__(self):
-        return f'basket of {self.user.email}'"""
+    def __str__(self):
+        return f'basket of {self.user.email}'
 
 
 class Coupone(models.Model):
