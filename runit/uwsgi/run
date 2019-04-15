@@ -15,7 +15,6 @@ fi
 
 pushd /webstore/django
 
-python manage.py makemigrations
 python manage.py migrate
 
 if [[ $? != 0 ]]; then
