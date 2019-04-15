@@ -17,8 +17,8 @@ class CustomUser(AbstractUser):
         if is_new:
             Basket = apps.get_model('core', 'Basket')
             basket = Basket()
+            basket.user = self
             basket.save()
-            self.basket = basket
         super(CustomUser, self).save(*args, **kwargs)
 
     def __str__(self):
