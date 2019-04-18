@@ -13,7 +13,7 @@
         th {text-align: center}
     </style>
 
-    <table class="table table-striped ml-5" style="width: 32rem;">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th scope="col">#</th>
@@ -151,7 +151,7 @@
 
 {% block sidebar_right %}
     {% for review in object_list %}
-        <div class="card text-center mb-3 mr-5">
+        <div class="card text-center mb-3">
             <div class="card-header">
                 <h3>
                     {% if review.rating == 0 %}
@@ -181,7 +181,7 @@
     {% include 'core/includes/pagination.html' %}
 
     {% if user.is_authenticated %}
-        <form class="mr-5" method="POST" action="{{review_form_url}}">
+        <form method="POST" action="{{review_form_url}}">
             {% csrf_token %}
             {{ review_form|crispy }}
             <button class="btn btn-success mt-3">

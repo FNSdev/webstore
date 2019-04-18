@@ -17,11 +17,10 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         from core.forms import FormGenerator, GENERATED_FORMS
         old = Category.objects.filter(slug__iexact=self.slug).first()
-        print(old)
         if old:
             if old.name != self.name:
                 self.slug = slugify(f'{self.name}-{int(time.time())}')
-            if old.specifications != self.specifications:
+            if old.name != self.name or old.specifications != self.specifications:
                 form = FormGenerator.generate(self.slug, self.specifications)
                 GENERATED_FORMS[self.slug] = form
         else:  
@@ -77,7 +76,7 @@ class Product(models.Model):
 
 
 def product_image_upload_path(instance, filename):
-    return f'{instance.product.name} / {uuid4()}'
+    return f'{instance.product.name}/{uuid4()}'
 
 
 class ProductImage(models.Model):
@@ -92,6 +91,7 @@ class Basket(models.Model):
     products = models.ManyToManyField(to=Product, through='ProductInBasket')   
     total_count = models.PositiveIntegerField(default=0)
     coupone_code = models.UUIDField(null=True, blank=True)
+    user = models.OneToOneField(to='user.CustomUser', on_delete=models.CASCADE, null=True, blank=True)
 
     def get_total_price(self):
         total = 0
@@ -101,7 +101,7 @@ class Basket(models.Model):
         return total
 
     def __str__(self):
-        return f'basket of {self.customuser.email}'
+        return f'basket of {self.user.email}'
 
 
 class Coupone(models.Model):
@@ -162,7 +162,7 @@ class ProductInOrder(models.Model):
 
 
 def announcement_image_upload_path(instance, filename):
-    return f'{instance.header} / {uuid4()}'
+    return f'{instance.header}/{uuid4()}'
 
 
 class Announcement(models.Model):

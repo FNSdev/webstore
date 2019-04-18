@@ -17,3 +17,4 @@ urlpatterns = [
     path('user/', include(user.urls, namespace='user')),
     path('', include(core.urls, namespace='core')),
 ] + MEDIA_FILE_PATHS
+
