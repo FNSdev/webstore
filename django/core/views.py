@@ -86,7 +86,6 @@ class ProductsView(ListView):
         for k in [k for k, v in args.items() if not v]:
             del args[k]
         
-        #TODO it might work very slow, need to think more
         if args:
             for product in qs:
                 specs = product.specifications
@@ -94,7 +93,7 @@ class ProductsView(ListView):
                 for k, v in specs.items():
                     lower_case_specs[k.lower()] = v.lower()
                 for k, v in args.items():
-                    if lower_case_specs.get(k.lower()) != v.lower():
+                    if lower_case_specs.get(k.lower()).find(v.lower()) == -1:
                         qs = qs.exclude(id=product.id)
                         break
             
