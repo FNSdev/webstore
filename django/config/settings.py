@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'crispy_forms',
+    'django_admin_hstore_widget',
 ]
 
 MIDDLEWARE = [

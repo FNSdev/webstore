@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Orders
+{% endblock title %}
+
+{% block main %}  
+
+    <div class="accordion" id="orders_accordion">
+        {% for order, form, products in object_list %}
+            <div class="card">
+                <div class="card-header" id="heading_{{forloop.counter}}">
+                    <h3 class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapse_{{forloop.counter}}" aria-expanded="false" aria-controls="collapse_{{forloop.counter}}">
+                        Order #{{order.id}}, {{order.date}}
+                    </h3>
+                    <h5>
+                        {% include 'core/includes/order_status.html' %}
+                    </h5>
+                </div>
+                <div class="collapse" id="collapse_{{forloop.counter}}" aria-labelledby="heading_{{forloop.counter}}" data-parent="#orders_accordion">
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">First name</th>
+                                    <td>{{order.user.first_name}}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Last name</th>
+                                    <td>{{order.user.last_name}}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">City</th>
+                                    <td>{{order.user.city}}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Address</th>
+                                    <td>{{order.user.address}}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">E-mail</th>
+                                    <td>{{order.user.email}}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Phone number</th>
+                                    <td>{{order.user.phone_number}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">Count</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {% for product_in_order in products %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'core:product' slug=product_in_order.product.slug %}">
+                                                {{product_in_order.product.name}}
+                                            </a>
+                                        </th>
+                                        <td>{{product_in_order.count}}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="alert alert-success">
+                            Discount: {{ order.discount }} %
+                        </div>
+                        <div class="alert alert-info" role="alert">
+                            Total Payment: {{ order.total_price }}
+                        </div>
+                        <form method="POST" action="{% url 'core:update-order' pk=order.id %}">
+                            {% csrf_token %}
+                            {{form|crispy}}
+                            <button class="btn btn-success mt-3">
+                                Update status
+                            </button>
+                        </form>
+                    </div>
+                </div>                        
+            </div>
+        {% endfor %} 
+    </div>   
+
+    {% include 'core/includes/pagination.html' %}
+
+{% endblock main %}
