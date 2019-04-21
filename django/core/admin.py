@@ -1,19 +1,42 @@
 from django.contrib import admin
+from django.forms import ModelForm
+from django_admin_hstore_widget.forms import HStoreFormField
 
 from core.models import *
 
 
+class ProductAdminForm(ModelForm):
+    specifications = HStoreFormField()
+
+    class Meta:
+        model = Product
+        exclude = ()
+
+
+class CategoryAdminForm(ModelForm):
+    specifications = HStoreFormField()
+
+    class Meta:
+        model = Category
+        exclude = ()
+
+
 class CategoryAdmin(admin.ModelAdmin):
     model = Category
+    form = CategoryAdminForm
     readonly_fields = ['slug']
+
 
 class ProductAdmin(admin.ModelAdmin):
     model = Product
+    form = ProductAdminForm
     readonly_fields = ['slug']
+
 
 class AnnouncementAdmin(admin.ModelAdmin):
     model = Announcement
     readonly_fields = ['slug']
+
 
 class CouponeAdmin(admin.ModelAdmin):
     model = Coupone

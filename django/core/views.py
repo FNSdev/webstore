@@ -1,15 +1,14 @@
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import render, redirect, reverse
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.core.exceptions import PermissionDenied
 
 from core.models import Category, Product, Announcement, ProductInBasket, Order, ProductInOrder, Review, Coupone
 from core.models import MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
 from user.models import CustomUser
-from core.forms import GENERATED_FORMS, ReviewForm
+from core.forms import GENERATED_FORMS, ReviewForm, OrderForm
 
 import ast
 import re
@@ -145,7 +144,6 @@ class ProductDetailView(ListView):
     
     def get_queryset(self):
         product = self.get_object()
-        print(product)
         return Review.objects.filter(product=product)
     
     def get_object(self):
@@ -333,3 +331,34 @@ class MakeOrderView(LoginRequiredMixin, View):
         basket.save()    
 
         return redirect('core:index')
+
+
+class OrderListView(PermissionRequiredMixin, ListView):
+    model = Order
+    paginate_by = 10
+    template_name = 'core/orders.html'
+    login_url = '/user/login'
+
+    permission_required = ('order.can_change')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        forms = []
+        products = []
+        orders = ctx['object_list']
+        for order in orders:
+            forms.append(OrderForm(instance=order))
+            products.append(ProductInOrder.objects.filter(order__id=order.id))
+        orders_forms_products = zip(orders, forms, products)
+        ctx['object_list'] = orders_forms_products
+        return ctx
+
+
+class UpdateOrderView(PermissionRequiredMixin, UpdateView):
+    login_url = '/user/login'
+    permission_required = ('order.can_change')
+    form_class = OrderForm
+    queryset = Order.objects.all()
+
+    def get_success_url(self):
+        return reverse('core:orders')

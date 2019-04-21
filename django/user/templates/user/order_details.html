@@ -36,15 +36,7 @@
 
     <div class="card text-center">
         <div class="card-header">
-            {% if order.status == 0 %}
-                <span class="badge badge-warning">{{order.get_status_display}}</span>
-            {% elif order.status == 1 %}                
-                <span class="badge badge-info">{{order.get_status_display}}</span>                
-            {% elif order.status == 2 %}                
-                <span class="badge badge-success">{{order.get_status_display}}</span>               
-            {% elif order.status == 3 %}              
-                <span class="badge badge-danger">{{order.get_status_display}}</span>
-            {% endif %}
+            {% include 'core/includes/order_status.html' %}
         </div>
         <div class="card-body">
             <div class="alert alert-success">

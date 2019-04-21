@@ -6,8 +6,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.urls import reverse_lazy
 from django.shortcuts import render, reverse, redirect
 from django.contrib import messages
-from django.http import Http404
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 
 from user.forms import CustomUserCreationForm, CustomUserChangeForm
 from user.models import CustomUser
@@ -20,6 +19,7 @@ class RegisterView(CreateView):
 
 
 class ProfileView(LoginRequiredMixin, View):
+    login_url = '/user/login'
     def get(self, request, *args, **kwargs):
         return render(request, 'user/profile.html')
 
@@ -28,6 +28,7 @@ class OrdersView(LoginRequiredMixin, ListView):
     template_name = 'user/orders.html'
     model = Order
     paginate_by = 10
+    login_url = '/user/login'
 
     def get_queryset(self):
         queryset = Order.objects.filter(user=self.request.user)
@@ -38,6 +39,7 @@ class ReviewsView(LoginRequiredMixin, ListView):
     template_name = 'user/reviews.html'
     model = Review
     paginate_by = 5
+    login_url = '/user/login'
 
     def get_queryset(self):
         queryset = Review.objects.filter(user=self.request.user)
@@ -84,4 +86,4 @@ class OrderDetailsView(View):
             products = ProductInOrder.objects.filter(order__id=order_id)
             return render(request, 'user/order_details.html', {'order': order, 'products_in_order': products})
         else:
-            raise Http404
+            raise PermissionDenied()

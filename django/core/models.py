@@ -108,6 +108,9 @@ class Coupone(models.Model):
     discount = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100)])
     code = models.UUIDField(default=uuid4, editable=False)
 
+    def __str__(self):
+        return f'{self.code} : {self.discount}%'
+
 
 class ProductInBasket(models.Model):
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
