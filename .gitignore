@@ -193,3 +193,6 @@ pip-selfcheck.json
 
 #Media
 media_root/
+
+#vscode
+.vscode/
