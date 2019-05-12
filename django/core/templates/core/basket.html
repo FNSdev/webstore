@@ -173,7 +173,7 @@
                 }
             }
 
-            if(correct)
+            if(correct && counter != 0)
             {
                 data['pairs'] = JSON.stringify(data['pairs'])
                 data['csrfmiddlewaretoken'] = '{{ csrf_token }}'

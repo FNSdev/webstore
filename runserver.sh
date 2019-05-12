@@ -7,6 +7,7 @@ then
     cd ..
     source venv/bin/activate
     cd $path
+    export DJANGO_SETTINGS_MODULE=config.local_settings
     python manage.py runserver
 else
     echo 'Wrong directory'
