@@ -9,7 +9,7 @@ RUN apt-get install -y \
     postgresql-client \
     python3 \
     python3-pip \
-    python3-venv \
+    python3-venv 
 COPY requirements* /webstore/
 COPY django/ /webstore/django
 COPY bash_scripts/ /webstore/scripts
