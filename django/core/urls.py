@@ -20,4 +20,6 @@ urlpatterns = [
     path('product/<str:slug>/review/', CreateReviewView.as_view(), name='create-review'),
     path('product/<str:slug>/review/<int:pk>', UpdateReviewView.as_view(), name='update-review'),
     path('announcement/<str:slug>/', AnnouncementDetailView.as_view(), name='announcement'),    
+    path('orders', OrderListView.as_view(), name='orders'),
+    path('order/<int:pk>', UpdateOrderView.as_view(), name='update-order'),
 ]

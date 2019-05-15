@@ -1,19 +1,20 @@
 from django.views.generic import DetailView, ListView, CreateView, UpdateView
 from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import render, redirect, reverse
 from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse, HttpResponseNotFound
 
 from core.models import Category, Product, Announcement, ProductInBasket, Order, ProductInOrder, Review, Coupone
 from core.models import MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
 from user.models import CustomUser
-from core.forms import GENERATED_FORMS, ReviewForm
+from core.forms import GENERATED_FORMS, ReviewForm, OrderForm
 
 import ast
 import re
+import logging
 
+logger = logging.getLogger('django.bad_request_args')
 
 UUID4_PATTERN = r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
 
@@ -36,13 +37,18 @@ class SearchView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['search'] = self.request.GET.get('search')
+        search = self.request.GET.get('search')
+        ctx['search'] = search if search is not None else ''
         ctx['categories'] = Category.objects.all()
         return ctx
 
     def get_queryset(self):
         name = self.request.GET.get('search')
-        qs = Product.objects.filter(name__icontains=name)
+        if name is None:
+            logger.warning('search, name = None')
+            qs = Product.objects.all()
+        else:
+            qs = Product.objects.filter(name__icontains=name)
         return qs
 
 
@@ -87,13 +93,11 @@ class ProductsView(ListView):
             del args[k]
         
         if args:
-            for product in qs:
-                specs = product.specifications
-                lower_case_specs = {}
-                for k, v in specs.items():
-                    lower_case_specs[k.lower()] = v.lower()
-                for k, v in args.items():
-                    if lower_case_specs.get(k.lower()).find(v.lower()) == -1:
+            for k, v in args.items():
+                k = k.lower()
+                v = v.lower()
+                for product in qs:
+                    if product.specifications.get(k) is None or product.specifications[k].find(v) == -1:
                         qs = qs.exclude(id=product.id)
                         break
             
@@ -145,7 +149,6 @@ class ProductDetailView(ListView):
     
     def get_queryset(self):
         product = self.get_object()
-        print(product)
         return Review.objects.filter(product=product)
     
     def get_object(self):
@@ -200,17 +203,23 @@ class AddToBasketView(LoginRequiredMixin, View):
     login_url = '/user/login'
 
     def post(self, request, *args, **kwargs):
-        product_id = request.POST['id']
         count = request.POST['count']
         user = request.user 
-
-        product = Product.objects.filter(id__iexact=product_id).first()
-
         basket = user.basket 
-        basket.total_count += 1
-        basket.save()
 
-        ProductInBasket.objects.create(product=product, basket=user.basket, count=count)
+        try:
+            count = int(count)
+            if count > 0:
+                product_id = int(request.POST['id'])
+                product = get_object_or_404(Product, id=product_id)
+
+                basket.total_count += 1
+                basket.save()
+
+                ProductInBasket.objects.create(product=product, basket=user.basket, count=count)
+        except ValueError:
+            logger.warning(f'add to basket, request.POST = {request.POST}')
+            return HttpResponseNotFound()
 
         return JsonResponse({'count': basket.total_count})
 
@@ -224,20 +233,23 @@ class UpdateBasketView(LoginRequiredMixin, View):
         code = request.POST['code']
 
         pairs = ast.literal_eval(pairs)
-        
-        for key, value in pairs.items():
-            val = int(value)
-            if val > 0 and val <= MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT:
-                product_in_basket = ProductInBasket.objects.get(id=key)
-                product_in_basket.count = val
-                product_in_basket.save()
+        try:
+            for key, value in pairs.items():
+                val = int(value)
+                if val > 0 and val <= MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT:
+                    product_in_basket = get_object_or_404(ProductInBasket, id=key)
+                    product_in_basket.count = val
+                    product_in_basket.save()
 
-        if re.fullmatch(UUID4_PATTERN, code):
-            if Coupone.objects.get(code=code):
-                basket.coupone_code = code
-                basket.save()
-
-        return JsonResponse({})
+            if re.fullmatch(UUID4_PATTERN, code):
+                if Coupone.objects.get(code=code):
+                    basket.coupone_code = code
+                    basket.save()
+        except ValueError:
+            logger.warning(f'update basket, pairs = {pairs}, code = {code}')
+            return JsonResponse({'success': False})
+            
+        return JsonResponse({'success': True})
 
     
 class RemoveFromBasketView(LoginRequiredMixin, View):
@@ -249,11 +261,14 @@ class RemoveFromBasketView(LoginRequiredMixin, View):
 
         product_in_basket = ProductInBasket.objects.get(id__iexact=product_id)
 
-        basket.total_count -= 1
-        basket.save()
+        if product_in_basket:
+            basket.total_count -= 1
+            basket.save()
 
-        product_in_basket.delete()
-        total = basket.get_total_price()
+            product_in_basket.delete()
+            total = basket.get_total_price()
+        else:
+            logger.warning(f'remove from basket, id = {id}')
 
         return JsonResponse({'total': total, 'count': basket.total_count})
 
@@ -333,3 +348,34 @@ class MakeOrderView(LoginRequiredMixin, View):
         basket.save()    
 
         return redirect('core:index')
+
+
+class OrderListView(PermissionRequiredMixin, ListView):
+    model = Order
+    paginate_by = 10
+    template_name = 'core/orders.html'
+    login_url = '/user/login'
+
+    permission_required = ('order.can_change')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        forms = []
+        products = []
+        orders = ctx['object_list']
+        for order in orders:
+            forms.append(OrderForm(instance=order))
+            products.append(ProductInOrder.objects.filter(order__id=order.id))
+        orders_forms_products = zip(orders, forms, products)
+        ctx['object_list'] = orders_forms_products
+        return ctx
+
+
+class UpdateOrderView(PermissionRequiredMixin, UpdateView):
+    login_url = '/user/login'
+    permission_required = ('order.can_change')
+    form_class = OrderForm
+    queryset = Order.objects.all()
+
+    def get_success_url(self):
+        return reverse('core:orders')

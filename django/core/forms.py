@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 
 #from .models import Product
-from core.models import Review, Product, Category
+from core.models import Review, Product, Category, Order
 from user.models import CustomUser
 import ast
 
@@ -50,3 +50,9 @@ class ReviewForm(ModelForm):
         widget=forms.Select,
         choices=Review.RATINGS,
     )
+
+
+class OrderForm(ModelForm):
+    class Meta:
+        model = Order
+        fields = ('status', )

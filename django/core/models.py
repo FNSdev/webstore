@@ -17,6 +17,12 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         from core.forms import FormGenerator, GENERATED_FORMS
         old = Category.objects.filter(slug__iexact=self.slug).first()
+
+        lower_case_specifications = {}
+        for k, v in self.specifications.items():
+            lower_case_specifications[k.lower()] = v.lower()
+        self.specifications = lower_case_specifications
+
         if old:
             if old.name != self.name:
                 self.slug = slugify(f'{self.name}-{int(time.time())}')
@@ -27,6 +33,7 @@ class Category(models.Model):
             self.slug = slugify(f'{self.name}-{int(time.time())}')          
             form = FormGenerator.generate(self.slug, self.specifications)
             GENERATED_FORMS[self.slug] = form
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -48,7 +55,11 @@ class Product(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
 
     def save(self, *args, **kwargs):
-        old = Product.objects.filter(slug__iexact=self.slug).first()
+        old = Product.objects.get(slug=self.slug)
+        lower_case_specifications = {}
+        for k, v in self.specifications.items():
+            lower_case_specifications[k.lower()] = v.lower()
+        self.specifications = lower_case_specifications
         if old:
             if old.name!=self.name:
                 self.slug = slugify(f'{self.name}-{int(time.time())}')
@@ -107,6 +118,9 @@ class Basket(models.Model):
 class Coupone(models.Model):
     discount = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100)])
     code = models.UUIDField(default=uuid4, editable=False)
+
+    def __str__(self):
+        return f'{self.code} : {self.discount}%'
 
 
 class ProductInBasket(models.Model):

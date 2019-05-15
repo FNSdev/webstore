@@ -26,6 +26,4 @@ popd
 
 exec /sbin/setuser www-data \
     uwsgi \
-    --ini /etc/uwsgi/apps-enabled/webstore.ini \
-    >> /var/log/uwsgi/webstore.log \
-    2>&1
+    --ini /etc/uwsgi/apps-enabled/webstore.ini

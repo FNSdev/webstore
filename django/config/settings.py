@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'crispy_forms',
+    'django_admin_hstore_widget',
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,40 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_REGION_NAME = 'eu-central-1'    
 
 #SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+#LOGGING 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {lineno} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.environ.get('DJANGO_LOG_FILE'),
+        },
+        'bad_request_args_file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': os.environ.get('DJANGO_BAD_REQUEST_ARGS_LOG_FILE'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'django.bad_request_args': {
+            'handlers': ['bad_request_args_file'],
+            'level': 'WARNING',
+            'propagate': False
+        }
+    },
+}

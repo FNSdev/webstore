@@ -4,20 +4,20 @@ FROM phusion/baseimage:0.11
 RUN mkdir /webstore
 WORKDIR /webstore
 RUN apt-get -y update
-RUN add-apt-repository -y ppa:certbot/certbot
-RUN apt-get -y update
 RUN apt-get install -y \
     nginx \
     postgresql-client \
     python3 \
     python3-pip \
-    python3-venv \
-    certbot python-certbot-nginx
+    python3-venv 
 COPY requirements* /webstore/
 COPY django/ /webstore/django
 COPY bash_scripts/ /webstore/scripts
 RUN mkdir /var/log/webstore
 RUN touch /var/log/webstore/webstore.log
+RUN touch /var/log/webstore/webstore_bad_request_args.log
+RUN chown www-data /var/log/webstore/webstore.log
+RUN chown www-data /var/log/webstore/webstore_bad_request_args.log
 RUN python3 -m venv /webstore/venv
 RUN bash /webstore/scripts/pip_install.sh /webstore
 
@@ -36,10 +36,10 @@ COPY uwsgi/webstore.ini /etc/uwsgi/apps-enabled/webstore.ini
 RUN mkdir -p /var/log/uwsgi
 RUN touch /var/log/uwsgi/webstore.log
 RUN chown www-data /var/log/uwsgi/webstore.log
-RUN chown www-data /var/log/webstore/webstore.log
 COPY runit/uwsgi /etc/service/uwsgi
 RUN chmod +x /etc/service/uwsgi/run
 
 # Finishing
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 EXPOSE 80
+EXPOSE 443

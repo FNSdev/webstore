@@ -41,23 +41,9 @@
                         </a>
                     </td>
                     <td>{{order.total_price}}</td>
-                    {% if order.status == 0 %}
-                        <td>
-                            <span class="badge badge-warning">{{order.get_status_display}}</span>
-                        </td>
-                    {% elif order.status == 1 %}
-                        <td>
-                            <span class="badge badge-info">{{order.get_status_display}}</span>
-                        </td>
-                    {% elif order.status == 2 %}
-                        <td>
-                            <span class="badge badge-success">{{order.get_status_display}}</span>
-                        </td>
-                    {% elif order.status == 3 %}
-                        <td>
-                            <span class="badge badge-danger">{{order.get_status_display}}</span>
-                        </td>
-                    {% endif %}
+                    <td>
+                        {% include 'core/includes/order_status.html' %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
