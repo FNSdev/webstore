@@ -93,13 +93,11 @@ class ProductsView(ListView):
             del args[k]
         
         if args:
-            for product in qs:
-                specs = product.specifications
-                lower_case_specs = {}
-                for k, v in specs.items():
-                    lower_case_specs[k.lower()] = v.lower()
-                for k, v in args.items():
-                    if lower_case_specs.get(k.lower()).find(v.lower()) == -1:
+            for k, v in args.items():
+                k = k.lower()
+                v = v.lower()
+                for product in qs:
+                    if product.specifications.get(k) is None or product.specifications[k].find(v) == -1:
                         qs = qs.exclude(id=product.id)
                         break
             
