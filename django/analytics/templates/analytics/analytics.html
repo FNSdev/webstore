@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Analytics
+{% endblock title %}
+
+{% block sidebar_left %}
+    <h4>Add custom sample</h4>
+    <form method="POST" action="{% url 'analytics:add-data-sample'%}">
+        {% csrf_token %}
+        {{form|crispy}}
+        <button class="btn btn-success mt-3" type="submit">
+            Add Sample
+        </button>
+    </form>
+    <h4 class="mt-5">Add pre-populated sample (last 30 days)</h4>
+    <form method="POST" action="{% url 'analytics:add-data-sample'%}">
+        {% csrf_token %}
+        {{prepopulated_form|crispy}}
+        <button class="btn btn-success mt-3" type="submit">
+            Add Sample
+        </button>
+    </form>
+    <a href="{% url 'analytics:train-model' %}" class="btn btn-warning mt-5">Train Model</a>
+{% endblock sidebar_left %}
+
+
+{% block main %}
+    <h4>Predict Profit</h4>
+    <form id="predict-form" method="GET">
+        {{predict_form|crispy}}
+        <button class="btn btn-success mt-3" type="submit">
+            Predict
+        </button>
+    </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        jQuery(document).on('submit', '#predict-form', function(e) {
+            e.preventDefault()
+            var jq = jQuery.noConflict() 
+            var $this = $(this)
+            
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'analytics:predict-profit' %}",
+                data: $(this).serialize(),
+                success: function(response) {
+                    alert(response['profit'])
+                },
+                error: function() {
+                    alert('Error!')
+                }
+            })
+        })
+    </script>
+
+{% endblock main %}
+
