@@ -2,24 +2,29 @@ from django.views import View
 from django.views.generic import TemplateView, CreateView
 from django.shortcuts import redirect, reverse
 from django.http import JsonResponse
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 from analytics.models import DataSample
 from analytics.forms import DataSampleForm, PredictForm
 from analytics.analytics import Model
 
-class AnalyticsView(TemplateView):
+class AnalyticsView(PermissionRequiredMixin, TemplateView):
     template_name = 'analytics/analytics.html'
+    login_url = '/user/login'
+    permission_required = ('data_sample.can_add')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['form'] = DataSampleForm()
-        ctx['prepopulated_form'] = DataSampleForm(initial=DataSample.make_sample())
+        ctx['prepopulated_form'] = DataSampleForm(initial=DataSample.prepare_sample())
         ctx['predict_form'] = PredictForm()
         return ctx
 
 
-class AddDataSampleView(CreateView):
+class AddDataSampleView(PermissionRequiredMixin, CreateView):
     form_class = DataSampleForm
+    login_url = '/user/login'
+    permission_required = ('data_sample.can_add')
 
     def get_success_url(self):
         return reverse('analytics:analytics')
@@ -28,7 +33,10 @@ class AddDataSampleView(CreateView):
         return redirect(to=self.get_success_url())
 
 
-class TrainModelView(View):
+class TrainModelView(PermissionRequiredMixin, View):
+    login_url = '/user/login'
+    permission_required = ('data_sample.can_add')
+
     def get(self, request):
         x, y = DataSample.get_data()
         model = Model()
@@ -36,19 +44,19 @@ class TrainModelView(View):
         return JsonResponse({'status': 'ok', 'coefficients': list(model.get_coefficients())})
 
 
-class PredictProfitView(View):
+class PredictProfitView(PermissionRequiredMixin, View):
+    login_url = '/user/login'
+    permission_required = ('data_sample.can_add')
+
     def get(self, request):
         args = request.GET
-        print(args)
         x = [
             float(args['advertising_costs']),
             int(args['total_user_count']),
             int(args['new_user_count']),
+            int(args['orders_count']),
             int(args['used_coupone_count']),
             float(args['average_discount']),
         ]
-        print(x)
         profit = Model().predict(x)
-        print(args)
-        print(profit)
         return JsonResponse({'profit': profit})

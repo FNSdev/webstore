@@ -11,12 +11,13 @@ class DataSample(models.Model):
     advertising_costs = models.DecimalField(max_digits=9, decimal_places=2, default=0)
     total_user_count = models.PositiveIntegerField(default=0)
     new_user_count = models.PositiveIntegerField(default=0)
+    orders_count = models.PositiveIntegerField(default=0)
     used_coupone_count = models.PositiveIntegerField(default=0)
     average_discount = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100)])
     profit = models.DecimalField(max_digits=9, decimal_places=2, default=0)
 
     @staticmethod
-    def make_sample():
+    def prepare_sample():
         args = {}
 
         date = datetime.datetime.now()
@@ -26,6 +27,7 @@ class DataSample(models.Model):
         args['new_user_count'] = CustomUser.objects.filter(date_joined__date__gt=date).count()
 
         orders = Order.objects.filter(date__date__gt=date)
+        args['orders_count'] = orders.count()
 
         profit = 0
         coupones = 0
@@ -43,7 +45,6 @@ class DataSample(models.Model):
         args['average_discount'] = discount
         args['profit'] = profit
 
-        print(args)
         return args
 
     @staticmethod
@@ -62,6 +63,7 @@ class DataSample(models.Model):
             self.advertising_costs,
             self.total_user_count,
             self.new_user_count,
+            self.orders_count,
             self.used_coupone_count,
             self.average_discount,
         ]
