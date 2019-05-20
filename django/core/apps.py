@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from django.forms import Form
 import sys
 import ast
 
@@ -11,12 +12,12 @@ class CoreConfig(AppConfig):
                 return True
         
         from core.models import Category
-        from core.forms import FormGenerator, GENERATED_FORMS
+        from core.forms import MetaForm, GENERATED_FORMS
         categories = Category.objects.all()
         for cat in categories:
             specs = cat.specifications
             specs = specs.replace('=>', ':')
             specs = '{' + specs + '}'
             specs = ast.literal_eval(specs)
-            form = FormGenerator.generate(cat.slug, specs)
+            form = MetaForm(cat.slug, (Form, ), specs)
             GENERATED_FORMS[cat.slug] = form

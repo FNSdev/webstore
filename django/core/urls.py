@@ -1,8 +1,6 @@
 from django.urls import path
 
 from core.views import *
-from core.models import Category
-from core.forms import FormGenerator, GENERATED_FORMS
 
 
 app_name = 'core'

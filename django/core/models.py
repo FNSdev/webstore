@@ -15,7 +15,9 @@ class Category(models.Model):
     specifications = HStoreField(default=dict)
 
     def save(self, *args, **kwargs):
-        from core.forms import FormGenerator, GENERATED_FORMS
+        from core.forms import MetaForm, GENERATED_FORMS
+        from django.forms import Form
+
         old = Category.objects.filter(slug__iexact=self.slug).first()
 
         lower_case_specifications = {}
@@ -27,11 +29,11 @@ class Category(models.Model):
             if old.name != self.name:
                 self.slug = slugify(f'{self.name}-{int(time.time())}')
             if old.name != self.name or old.specifications != self.specifications:
-                form = FormGenerator.generate(self.slug, self.specifications)
+                form = MetaForm(self.slug, (Form, ), self.specifications)
                 GENERATED_FORMS[self.slug] = form
         else:  
             self.slug = slugify(f'{self.name}-{int(time.time())}')          
-            form = FormGenerator.generate(self.slug, self.specifications)
+            form = MetaForm(self.slug, (Form, ), self.specifications)
             GENERATED_FORMS[self.slug] = form
 
         super().save(*args, **kwargs)
@@ -55,7 +57,7 @@ class Product(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
 
     def save(self, *args, **kwargs):
-        old = Product.objects.get(slug=self.slug)
+        old = Product.objects.get(slug=self.slug) if self.id else None
         lower_case_specifications = {}
         for k, v in self.specifications.items():
             lower_case_specifications[k.lower()] = v.lower()
@@ -154,7 +156,6 @@ class Order(models.Model):
     user = models.ForeignKey(to='user.CustomUser', on_delete=models.CASCADE)
     discount = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100)])
     total_price = models.DecimalField(max_digits=9, decimal_places=2, default=0)
-    price_with_discount = models.DecimalField(max_digits=9, decimal_places=2, default=0)
 
     class Meta:
         ordering = ('-date', '-total_price')

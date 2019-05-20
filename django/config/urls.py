@@ -6,6 +6,8 @@ from django.conf.urls.static import static
 
 import core.urls
 import user.urls
+import analytics.urls
+
 
 MEDIA_FILE_PATHS = static(
     settings.MEDIA_URL,
@@ -15,6 +17,7 @@ MEDIA_FILE_PATHS = static(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include(user.urls, namespace='user')),
+    path('analytics/', include(analytics.urls, namespace='analytics')),
     path('', include(core.urls, namespace='core')),
 ] + MEDIA_FILE_PATHS
 
