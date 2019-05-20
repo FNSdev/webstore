@@ -1,31 +1,27 @@
 from django import forms
 from django.forms import ModelForm
+from django.forms.forms import DeclarativeFieldsMetaclass
 
-#from .models import Product
+import ast
 from core.models import Review, Product, Category, Order
 from user.models import CustomUser
-import ast
 
-class FormGenerator():
-    @staticmethod
-    def generate(slug, specifications):
+
+GENERATED_FORMS = {}
+
+
+class MetaForm(DeclarativeFieldsMetaclass):
+    def __new__(cls, clsname, bases, dct):
         params = {}
-
-        for key, value in specifications.items():
+        for key, value in dct.items():
             if value == 'str':
                 params[key] = forms.CharField(max_length=40, required=False)
             elif value == 'int':
                 params[key] = forms.IntegerField(required=False)
             else:
-                raise ValueError(f'Field type {value} is not supported')
+                raise ValueError(f'Field type {value} is not supported') 
 
-        name = slug + '_form'
-        form = type(name, (forms.Form,), params)
-        return form
-
-
-
-GENERATED_FORMS = {}
+        return super().__new__(cls, clsname, bases, params)
 
 
 class ReviewForm(ModelForm):

@@ -15,7 +15,9 @@ class Category(models.Model):
     specifications = HStoreField(default=dict)
 
     def save(self, *args, **kwargs):
-        from core.forms import FormGenerator, GENERATED_FORMS
+        from core.forms import MetaForm, GENERATED_FORMS
+        from django.forms import Form
+
         old = Category.objects.filter(slug__iexact=self.slug).first()
 
         lower_case_specifications = {}
@@ -27,11 +29,11 @@ class Category(models.Model):
             if old.name != self.name:
                 self.slug = slugify(f'{self.name}-{int(time.time())}')
             if old.name != self.name or old.specifications != self.specifications:
-                form = FormGenerator.generate(self.slug, self.specifications)
+                form = MetaForm(self.slug, (Form, ), self.specifications)
                 GENERATED_FORMS[self.slug] = form
         else:  
             self.slug = slugify(f'{self.name}-{int(time.time())}')          
-            form = FormGenerator.generate(self.slug, self.specifications)
+            form = MetaForm(self.slug, (Form, ), self.specifications)
             GENERATED_FORMS[self.slug] = form
 
         super().save(*args, **kwargs)
