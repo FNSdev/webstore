@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 
 from analytics.models import DataSample
 from analytics.forms import DataSampleForm, PredictForm
-from analytics.analytics import Model
+from analytics.analytics import train_profit, predict_profit, get_coefficients
 
 
 class AnalyticsView(PermissionRequiredMixin, TemplateView):
@@ -40,9 +40,8 @@ class TrainModelView(PermissionRequiredMixin, View):
 
     def get(self, request):
         x, y = DataSample.get_data()
-        model = Model()
-        model.train(x, y)
-        return JsonResponse({'status': 'ok', 'coefficients': list(model.get_coefficients())})
+        train_profit(x, y)
+        return JsonResponse({'status': 'ok', 'coefficients': list(get_coefficients())})
 
 
 class PredictProfitView(PermissionRequiredMixin, View):
@@ -59,6 +58,5 @@ class PredictProfitView(PermissionRequiredMixin, View):
             int(args['used_coupone_count']),
             float(args['average_discount']),
         ]
-        profit = Model().predict(x)
+        profit = predict_profit(x)
         return JsonResponse({'profit': profit})
-        
