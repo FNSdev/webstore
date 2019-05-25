@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from django.apps import apps
+from core.models import Basket
 
 
 class CustomUser(AbstractUser):
@@ -16,11 +16,9 @@ class CustomUser(AbstractUser):
         is_new = False if self.id else True
         super(CustomUser, self).save(*args, **kwargs)
         if is_new:
-            Basket = apps.get_model('core', 'Basket')
             basket = Basket()
             basket.user = self
             basket.save()
-
 
     def __str__(self):
         return self.email

@@ -14,5 +14,3 @@ class PredictForm(ModelForm):
     class Meta:
         model = DataSample
         exclude = ('profit', )
-
-

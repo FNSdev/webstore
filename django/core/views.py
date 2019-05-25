@@ -4,10 +4,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.shortcuts import render, redirect, reverse
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse, HttpResponseNotFound
+from django.core.exceptions import PermissionDenied
 
 from core.models import Category, Product, Announcement, ProductInBasket, Order, ProductInOrder, Review, Coupone
 from core.models import MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT
-from user.models import CustomUser
 from core.forms import GENERATED_FORMS, ReviewForm, OrderForm
 
 import ast
@@ -52,13 +52,13 @@ class SearchView(ListView):
         return qs
 
 
-class ProductsView(ListView):    
+class ProductsView(ListView):
     paginate_by = 10
     model = Product
     template_name = 'core/products.html'
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)       
+        ctx = super().get_context_data(**kwargs)
         ctx['paginate_by'] = self.paginate_by
 
         args = self.request.GET.dict()
@@ -72,7 +72,7 @@ class ProductsView(ListView):
 
     def get_queryset(self):
         category_slug = self.kwargs['category']
-        cat = get_object_or_404(Category, slug__iexact=category_slug)
+        cat = get_object_or_404(Category, slug=category_slug)
 
         query_dict = self.request.GET
         args = query_dict.dict()
@@ -80,7 +80,7 @@ class ProductsView(ListView):
         qs = cat.products.all()
 
         order_by = False
-                
+
         if args.get('paginate_by'):
             del args['paginate_by']
         if args.get('order_by'):
@@ -91,7 +91,7 @@ class ProductsView(ListView):
 
         for k in [k for k, v in args.items() if not v]:
             del args[k]
-        
+
         if args:
             for k, v in args.items():
                 k = k.lower()
@@ -100,7 +100,7 @@ class ProductsView(ListView):
                     if product.specifications.get(k) is None or product.specifications[k].find(v) == -1:
                         qs = qs.exclude(id=product.id)
                         break
-            
+
         if order_by:
             qs = qs.order_by(order_by)
 
@@ -145,17 +145,17 @@ class ProductDetailView(ListView):
             ctx['review_form'] = review_form
             ctx['review_form_url'] = review_form_url
 
-        return ctx    
-    
+        return ctx
+
     def get_queryset(self):
         product = self.get_object()
         return Review.objects.filter(product=product)
-    
+
     def get_object(self):
         slug = self.kwargs.get('slug')
         product = get_object_or_404(Product, slug__iexact=slug)
         return product
-        
+
 
 class CreateReviewView(LoginRequiredMixin, CreateView):
     login_url = '/user/login'
@@ -185,7 +185,7 @@ class UpdateReviewView(LoginRequiredMixin, UpdateView):
         review = super().get_object(queryset)
         user = self.request.user
         if review.user != user:
-            raise PermissionDeniend('Cannot change another user review')
+            raise PermissionDenied('Cannot change another user review')
         return review
 
     def get_success_url(self):
@@ -204,8 +204,8 @@ class AddToBasketView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         count = request.POST['count']
-        user = request.user 
-        basket = user.basket 
+        user = request.user
+        basket = user.basket
 
         try:
             count = int(count)
@@ -228,7 +228,7 @@ class UpdateBasketView(LoginRequiredMixin, View):
     login_url = '/user/login'
 
     def post(self, request, *args, **kwargs):
-        basket = request.user.basket 
+        basket = request.user.basket
         pairs = request.POST['pairs']
         code = request.POST['code']
 
@@ -248,16 +248,16 @@ class UpdateBasketView(LoginRequiredMixin, View):
         except ValueError:
             logger.warning(f'update basket, pairs = {pairs}, code = {code}')
             return JsonResponse({'success': False})
-            
+
         return JsonResponse({'success': True})
 
-    
+
 class RemoveFromBasketView(LoginRequiredMixin, View):
     login_url = '/user/login'
 
     def post(self, request, *args, **kwargs):
         product_id = request.POST['id']
-        basket = request.user.basket 
+        basket = request.user.basket
 
         product_in_basket = ProductInBasket.objects.get(id__iexact=product_id)
 
@@ -297,7 +297,7 @@ class ConfirmOrderView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         basket = request.user.basket
-        products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
+        products_in_basket = ProductInBasket.objects.filter(basket__id=basket.id)
         total = basket.get_total_price()
 
         ctx = {
@@ -322,7 +322,7 @@ class MakeOrderView(LoginRequiredMixin, View):
         user = request.user
         basket = user.basket
 
-        products_in_basket = ProductInBasket.objects.filter(basket__id = basket.id)
+        products_in_basket = ProductInBasket.objects.filter(basket__id=basket.id)
         total = basket.get_total_price()
         code = basket.coupone_code
         discount = 0
@@ -345,7 +345,7 @@ class MakeOrderView(LoginRequiredMixin, View):
             product_in_basket.delete()
 
         basket.total_count = 0
-        basket.save()    
+        basket.save()
 
         return redirect('core:index')
 
