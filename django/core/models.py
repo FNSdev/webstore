@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.postgres.fields import HStoreField, ArrayField
+from django.contrib.postgres.fields import HStoreField
 from django.utils.text import slugify
 from django.core.validators import MaxValueValidator
 
@@ -8,6 +8,7 @@ from uuid import uuid4
 import time
 
 MAX_PRODUCT_IN_BASKET_OR_ORDER_COUNT = 10
+
 
 class Category(models.Model):
     name = models.CharField(max_length=40)
@@ -18,7 +19,7 @@ class Category(models.Model):
         from core.forms import MetaForm, GENERATED_FORMS
         from django.forms import Form
 
-        old = Category.objects.filter(slug__iexact=self.slug).first()
+        old = Category.objects.get(slug=self.slug) if self.id else None
 
         lower_case_specifications = {}
         for k, v in self.specifications.items():
@@ -31,8 +32,8 @@ class Category(models.Model):
             if old.name != self.name or old.specifications != self.specifications:
                 form = MetaForm(self.slug, (Form, ), self.specifications)
                 GENERATED_FORMS[self.slug] = form
-        else:  
-            self.slug = slugify(f'{self.name}-{int(time.time())}')          
+        else:
+            self.slug = slugify(f'{self.name}-{int(time.time())}')
             form = MetaForm(self.slug, (Form, ), self.specifications)
             GENERATED_FORMS[self.slug] = form
 
@@ -63,7 +64,7 @@ class Product(models.Model):
             lower_case_specifications[k.lower()] = v.lower()
         self.specifications = lower_case_specifications
         if old:
-            if old.name!=self.name:
+            if old.name != self.name:
                 self.slug = slugify(f'{self.name}-{int(time.time())}')
         else:
             self.slug = slugify(f'{self.name}-{int(time.time())}')
@@ -98,10 +99,10 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return self.image.url
-       
+
 
 class Basket(models.Model):
-    products = models.ManyToManyField(to=Product, through='ProductInBasket')   
+    products = models.ManyToManyField(to=Product, through='ProductInBasket')
     total_count = models.PositiveIntegerField(default=0)
     coupone_code = models.UUIDField(null=True, blank=True)
     user = models.OneToOneField(to='user.CustomUser', on_delete=models.CASCADE, null=True, blank=True)
@@ -135,14 +136,14 @@ class ProductInBasket(models.Model):
 
     def __str__(self):
         return f'{self.product.name} in the "{self.basket}'
-    
+
 
 class Order(models.Model):
     RECIEVED = 0
     PROCCESSED = 1
     DELIVERED = 2
     REJECTED = 3
-    
+
     STATUSES = (
         (RECIEVED, 'RECIEVED'),
         (PROCCESSED, 'PROCCESSED'),
@@ -152,7 +153,7 @@ class Order(models.Model):
 
     products = models.ManyToManyField(to=Product, through='ProductInOrder')
     date = models.DateTimeField(auto_now_add=True)
-    status = models.IntegerField(choices=STATUSES, default=RECIEVED)    
+    status = models.IntegerField(choices=STATUSES, default=RECIEVED)
     user = models.ForeignKey(to='user.CustomUser', on_delete=models.CASCADE)
     discount = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100)])
     total_price = models.DecimalField(max_digits=9, decimal_places=2, default=0)
@@ -183,7 +184,7 @@ def announcement_image_upload_path(instance, filename):
 class Announcement(models.Model):
     header = models.CharField(max_length=80)
     body = models.TextField()
-    slug = models.SlugField(blank = True)
+    slug = models.SlugField(blank=True)
     date = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(blank=True, upload_to=announcement_image_upload_path)
 
@@ -193,7 +194,7 @@ class Announcement(models.Model):
     def save(self, *args, **kwargs):
         old = Announcement.objects.filter(slug__iexact=self.slug).first()
         if old:
-            if old.header!=self.header:
+            if old.header != self.header:
                 self.slug = slugify(f'{self.header}-{int(time.time())}')
         else:
             self.slug = slugify(f'{self.header}-{int(time.time())}')

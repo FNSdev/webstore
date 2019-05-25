@@ -24,4 +24,4 @@ class CustomUserChangeForm(UserFormMixin, UserChangeForm):
         ), label='Phone number: +375 (_ _) (_ _ _ _ _ _ _)'
     )
 
-    password=None
+    password = None

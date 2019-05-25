@@ -4,13 +4,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.urls import reverse_lazy
-from django.shortcuts import render, reverse, redirect
+from django.shortcuts import render, reverse, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 
 from user.forms import CustomUserCreationForm, CustomUserChangeForm
 from user.models import CustomUser
 from core.models import Order, ProductInOrder, Review
+
 
 class RegisterView(CreateView):
     form_class = CustomUserCreationForm
@@ -20,6 +21,7 @@ class RegisterView(CreateView):
 
 class ProfileView(LoginRequiredMixin, View):
     login_url = '/user/login'
+
     def get(self, request, *args, **kwargs):
         return render(request, 'user/profile.html')
 
@@ -44,13 +46,13 @@ class ReviewsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = Review.objects.filter(user=self.request.user)
         return queryset
-    
 
 
 class UpdateProfileView(LoginRequiredMixin, UpdateView):
     model = CustomUser
     form_class = CustomUserChangeForm
     template_name = 'user/update_profile.html'
+    login_url = '/user/login'
 
     def get_object(self):
         return self.request.user
@@ -73,14 +75,13 @@ def change_passoword_view(request):
     return render(request, 'user/change_password.html', {'form': form})
 
 
-class OrderDetailsView(View):
+class OrderDetailsView(LoginRequiredMixin, View):
+    login_url = '/user/login'
+
     def get(self, request, *args, **kwargs):
         order_id = kwargs['pk']
-
-        try:
-            order = Order.objects.get(id=order_id)
-        except ObjectDoesNotExist:
-            raise Http404
+  
+        order = get_object_or_404(Order, id=order_id)
 
         if order.user == request.user:
             products = ProductInOrder.objects.filter(order__id=order_id)

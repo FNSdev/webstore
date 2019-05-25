@@ -70,3 +70,4 @@ class DataSample(models.Model):
         y = self.profit
 
         return x, y
+        

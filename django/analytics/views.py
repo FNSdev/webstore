@@ -8,6 +8,7 @@ from analytics.models import DataSample
 from analytics.forms import DataSampleForm, PredictForm
 from analytics.analytics import Model
 
+
 class AnalyticsView(PermissionRequiredMixin, TemplateView):
     template_name = 'analytics/analytics.html'
     login_url = '/user/login'
@@ -60,3 +61,4 @@ class PredictProfitView(PermissionRequiredMixin, View):
         ]
         profit = Model().predict(x)
         return JsonResponse({'profit': profit})
+        
